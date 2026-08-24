@@ -7,7 +7,7 @@ points:
   amex_in_mr: 115000
   # "standard"        -> MRCC / Gold Charge / Platinum Travel / Platinum Reserve
   # "platinum_charge" -> Amex India Platinum Charge (better ratios on some partners)
-  card_tier: standard
+  card_tier: platinum_charge
   # Live transfer-bonus promos, e.g. {krisflyer: 20} for a 20% bonus.
   bonus_pct: {}
 

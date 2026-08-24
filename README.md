@@ -10,46 +10,42 @@ Membership Rewards balance. Built for one specific question:
 
 ## Read this before anything else
 
-The maths does not currently work, and the tool exists partly to tell you when
-that changes.
-
-Amex India transfers most airline partners at **2 MR : 1 mile**, not the 1:1 that
-US Amex cards get. So:
+The points sit on an Amex India **Platinum Charge**, which transfers most
+airline partners at **1 MR : 1 mile** rather than the 2:1 the other Indian Amex
+cards get. That is the difference between this trip being possible and not:
 
 | | Miles | Covers a BOM-ORD round trip in... |
 |---|---:|---|
-| 115,000 MR at 2:1 (MRCC, Gold Charge, Platinum Travel/Reserve) | **57,500** | nothing in premium or business |
-| 115,000 MR at 1:1 (Platinum Charge) | **115,000** | premium economy round trip, or business one way |
+| 115,000 MR at 1:1 (Platinum Charge — **your card**) | **115,000** | premium economy, yes. Business, no. |
+| 115,000 MR at 2:1 (MRCC, Gold Charge, Platinum Travel/Reserve) | 57,500 | neither |
 
 Rough round-trip cost on this route, per person:
 
-- **Premium economy:** ~88,000-110,000 miles
-- **Business:** ~175,000-210,000 miles
+- **Premium economy:** ~88,000-110,000 miles — **within reach**
+- **Business:** ~175,000-210,000 miles — **short by roughly 60,000-95,000 miles**
 
-At the standard 2:1 ratio you are roughly **30,500 miles short of premium
-economy** and **117,500 miles short of business**. To buy a business round trip
-outright you would need something like **350,000-420,000 MR**.
+So premium economy is a live booking today, and business is the thing worth
+watching for. Three things can close the business gap, and the poller tracks
+all of them:
 
-Four things can realistically close that gap, and the poller watches for all of
-them:
-
-1. **Your card tier.** If the points sit on an Amex India Platinum Charge, set
-   `card_tier: platinum_charge` in `config.yaml` and the balance doubles in
-   usable miles. Check this first; it is the single biggest variable.
+1. **Flying Blue Promo Rewards.** Air France-KLM discounts selected routes
+   25-50% every month. A 50% promo on BOM-CDG-ORD is the single most plausible
+   route to business on this balance. Flying Blue is also fully dynamic, which
+   is why the workflow polls every 6 hours rather than daily.
 2. **Transfer bonuses.** Amex India runs periodic bonus-transfer promos. Put a
    live one in `points.bonus_pct` (e.g. `{flyingblue: 30}`) and the report
-   re-prices everything against it.
-3. **Flying Blue Promo Rewards.** Air France-KLM discounts selected routes
-   25-50% every month. If BOM or ORD appears in one, that is the most plausible
-   path to business on a balance this size. Flying Blue is also fully dynamic,
-   which is why the workflow polls every 6 hours.
-4. **Booking one direction on points** and paying cash for the other. The
-   report prices each direction separately, so this is visible in the output.
+   re-prices everything against it. A 30% bonus turns 115,000 MR into 149,500
+   miles, which puts a discounted business round trip in range.
+3. **Business one way, premium the other.** 115,000 miles covers a one-way
+   business leg (~88,000) outright. The report prices each direction
+   separately, so this split is visible directly in the output.
 
 **Transfers are irreversible.** Never move points into a programme until you
 have the specific award seat held. Every ratio in
 `data/amex_in_partners.yaml` ships marked `verified: false` — confirm each one
-on americanexpress.com/in and flip the flag before you act on any of it.
+on americanexpress.com/in and flip the flag before you act on any of it. The
+Platinum Charge 1:1 ratios in particular are worth confirming per partner,
+since not every partner necessarily matches.
 
 ## On seats.aero and doing this for free
 
@@ -115,7 +111,7 @@ Everything lives in `config.yaml`. The fields worth revisiting:
 
 | Field | Why you would change it |
 |---|---|
-| `points.card_tier` | `platinum_charge` doubles your usable miles. Verify which you hold. |
+| `points.card_tier` | Set to `platinum_charge`. Reverting to `standard` halves your usable miles. |
 | `points.bonus_pct` | Per-partner transfer bonus, e.g. `{etihad: 20}` |
 | `trip.*_window` | The +/- 2 days. Widen it and the odds improve sharply. |
 | `alerts.max_miles_roundtrip` | Suppress everything above a mileage ceiling |

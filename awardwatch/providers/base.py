@@ -35,6 +35,11 @@ class AwardOption:
 class Provider(Protocol):
     name: str
 
+    # False for test doubles and sample data. Only live providers may feed the
+    # observation log -- a baseline built on fabricated numbers would flag
+    # fabricated deals, which is worse than having no baseline at all.
+    live: bool
+
     def search(
         self, trip: Trip, direction: str, cabin: str
     ) -> list[AwardOption]: ...

@@ -1,0 +1,56 @@
+# The transfer graph: every way Membership Rewards can become airline miles.
+#
+# Nodes are currencies. Edges are transfers. The point of modelling this as a
+# graph rather than a table is that indirect routes exist -- MR reaches Marriott
+# at 1:1 where airlines are 2:1, and Marriott reaches 20+ airlines -- so "which
+# partner has the best ratio" is the wrong question. The right question is which
+# *path* yields the most miles, and that has to be computed, not eyeballed.
+#
+# ratio: [in, out]. min/increment are in the SOURCE currency.
+# block_bonus: extra output miles granted per whole block of source points.
+
+currencies:
+  amex_mr:      {name: Amex India Membership Rewards, terminal: false}
+  marriott:     {name: Marriott Bonvoy, terminal: false}
+  virgin:       {name: Virgin Atlantic Flying Club, terminal: true}
+  avios_ba:     {name: British Airways Executive Club, terminal: true}
+  avios_qatar:  {name: Qatar Airways Privilege Club, terminal: true}
+  avios_iberia: {name: Iberia Plus, terminal: true}
+  avios_aerlingus: {name: Aer Lingus AerClub, terminal: true}
+  krisflyer:    {name: Singapore KrisFlyer, terminal: true}
+  etihad:       {name: Etihad Guest, terminal: true}
+  asiamiles:    {name: Cathay Asia Miles, terminal: true}
+  united:       {name: United MileagePlus, terminal: true}
+
+edges:
+  # --- Amex India MR out. Ratios confirmed with the card concierge 2026-08-24.
+  - {from: amex_mr, to: virgin,      ratio: [1000, 800],  min: 1000, increment: 1000, verified: true}
+  - {from: amex_mr, to: avios_ba,    ratio: [1000, 500],  min: 1000, increment: 1000, verified: true}
+  - {from: amex_mr, to: avios_qatar, ratio: [1000, 500],  min: 1000, increment: 1000, verified: true}
+  - {from: amex_mr, to: etihad,      ratio: [1000, 500],  min: 1000, increment: 1000, verified: true}
+  - {from: amex_mr, to: asiamiles,   ratio: [1000, 500],  min: 1000, increment: 1000, verified: true}
+  - {from: amex_mr, to: krisflyer,   ratio: [1000, 500],  min: 1000, increment: 1000, verified: true}
+
+  # Hotel exit at 1:1 -- twice the ratio of any airline edge. Whether that
+  # survives the onward hop to an airline is exactly what the solver decides.
+  # NOT confirmed by the concierge, who was asked about airlines only.
+  - {from: amex_mr, to: marriott,    ratio: [1000, 1000], min: 1000, increment: 1000, verified: false}
+
+  # --- Marriott out. 3:1 to most airlines, plus 5,000 bonus miles per 60,000
+  # points moved, which lifts the effective rate to 12:5 on whole blocks.
+  - {from: marriott, to: virgin,     ratio: [3, 1], min: 3000, increment: 1000, block_bonus: {per: 60000, bonus: 5000}, verified: false}
+  - {from: marriott, to: avios_ba,   ratio: [3, 1], min: 3000, increment: 1000, block_bonus: {per: 60000, bonus: 5000}, verified: false}
+  - {from: marriott, to: krisflyer,  ratio: [3, 1], min: 3000, increment: 1000, block_bonus: {per: 60000, bonus: 5000}, verified: false}
+  - {from: marriott, to: etihad,     ratio: [3, 1], min: 3000, increment: 1000, block_bonus: {per: 60000, bonus: 5000}, verified: false}
+  - {from: marriott, to: asiamiles,  ratio: [3, 1], min: 3000, increment: 1000, block_bonus: {per: 60000, bonus: 5000}, verified: false}
+  # United uniquely grants 10,000 per 60,000 rather than 5,000.
+  - {from: marriott, to: united,     ratio: [3, 1], min: 3000, increment: 1000, block_bonus: {per: 60000, bonus: 10000}, verified: false}
+
+  # --- Avios is one currency wearing five badges. Moving between these
+  # programmes is 1:1 and free, so a single transfer into any of them buys
+  # access to all of their award charts. It creates no extra miles, but it is
+  # the reason a 2:1 Avios transfer is worth more than its rate suggests.
+  - {from: avios_ba,    to: avios_qatar,     ratio: [1, 1], min: 1, increment: 1, pooling: true, verified: true}
+  - {from: avios_qatar, to: avios_ba,        ratio: [1, 1], min: 1, increment: 1, pooling: true, verified: true}
+  - {from: avios_ba,    to: avios_iberia,    ratio: [1, 1], min: 1, increment: 1, pooling: true, verified: true}
+  - {from: avios_ba,    to: avios_aerlingus, ratio: [1, 1], min: 1, increment: 1, pooling: true, verified: true}

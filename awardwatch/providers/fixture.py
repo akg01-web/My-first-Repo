@@ -18,6 +18,7 @@ FIXTURE_DIR = REPO_ROOT / "tests" / "fixtures"
 
 class FixtureProvider:
     name = "fixture"
+    live = False
 
     def __init__(self, directory: Path | None = None) -> None:
         self.directory = directory or FIXTURE_DIR

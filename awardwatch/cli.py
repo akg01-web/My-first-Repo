@@ -67,7 +67,13 @@ def run(config_path: str, dry_run: bool, out_path: str | None, optimize: str = "
     # the baseline must reflect what was actually offered, not what survived
     # this run's trip constraints.
     log_path = cfg.state_path.parent / "data" / "observations.csv"
-    fresh = observations.from_options([o for o in options if not o.estimated])
+    live_sources = {p.name for p in active if getattr(p, "live", False)}
+    fresh = observations.from_options(options, live_sources)
+    if options and not live_sources:
+        notes.append(
+            "No live provider ran, so nothing was logged and the baseline did "
+            "not advance. Any figures below are illustrative only."
+        )
     history = observations.load(log_path)
     bases = baseline.build(history)
 

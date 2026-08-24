@@ -38,6 +38,7 @@ CABIN_CODE = {"economy": "Y", "premium": "W", "business": "J", "first": "F"}
 
 class SeatsAeroProvider:
     name = "seatsaero"
+    live = True
 
     def __init__(self, api_key: str, timeout: int = 30) -> None:
         self.api_key = api_key

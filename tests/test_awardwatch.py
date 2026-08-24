@@ -377,3 +377,36 @@ def test_coverage_counts_only_established_slots():
     from awardwatch import baseline
     bases = baseline.build(_obs([90000] * 72) + _obs([50000] * 3, flight="2027-05-04"))
     assert baseline.coverage(bases, min_rows=24, min_hours=48) == (1, 2)
+
+
+def test_fixture_data_can_never_enter_the_observation_log():
+    """The bug that would have poisoned every baseline: sample data logged as real."""
+    from awardwatch import observations
+    cfg = _cfg()
+    opts = FixtureProvider().search(cfg.trip, "outbound", "business")
+    assert opts, "fixture returned nothing, so this test proves nothing"
+    assert observations.from_options(opts, live_sources={"seatsaero"}) == []
+    assert observations.from_options(opts, live_sources=set()) == []
+
+
+def test_only_live_sources_are_admitted_to_the_log():
+    from awardwatch import observations
+    cfg = _cfg()
+    opts = FixtureProvider().search(cfg.trip, "outbound", "business")
+    # Naming fixture as live is the only way its rows get in -- tests may, config may not.
+    assert len(observations.from_options(opts, live_sources={"fixture"})) == len(opts)
+
+
+def test_estimates_are_rejected_even_from_a_live_source():
+    from awardwatch import estimate, observations
+    cfg = _cfg()
+    baselines = estimate.load_baselines(cfg.baselines_path)
+    est = estimate.estimated_options(cfg.trip, baselines, ["virgin"])
+    assert est
+    for o in est:
+        object.__setattr__(o, "source", "seatsaero")  # even if a live source emitted it
+    assert observations.from_options(est, live_sources={"seatsaero"}) == []
+
+
+def test_production_config_does_not_enable_the_fixture_provider():
+    assert "fixture" not in _cfg().providers

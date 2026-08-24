@@ -1,0 +1,12 @@
+observed_at,program,cabin,direction,flight_date,miles,taxes_usd,seats,carrier,source,estimated
+2026-08-24T19:35:42+00:00,virgin,business,outbound,2027-05-05,76000,586.00,1,VS,fixture,0
+2026-08-24T19:35:42+00:00,virgin,business,outbound,2027-04-24,85000,586.00,2,VS,fixture,0
+2026-08-24T19:35:42+00:00,qatar_avios,business,outbound,2027-05-05,100000,85.00,2,QR,fixture,0
+2026-08-24T19:35:42+00:00,asiamiles,business,outbound,2027-05-02,130000,120.00,1,CX,fixture,0
+2026-08-24T19:35:42+00:00,virgin,premium,outbound,2027-05-03,46000,240.00,4,VS,fixture,0
+2026-08-24T19:35:42+00:00,etihad,premium,outbound,2027-05-04,44000,105.00,5,EY,fixture,0
+2026-08-24T19:35:42+00:00,virgin,business,return,2027-05-11,70000,586.00,2,DL,fixture,0
+2026-08-24T19:35:42+00:00,virgin,business,return,2027-05-22,82000,586.00,1,VS,fixture,0
+2026-08-24T19:35:42+00:00,qatar_avios,business,return,2027-05-22,100000,85.00,2,QR,fixture,0
+2026-08-24T19:35:42+00:00,virgin,premium,return,2027-05-20,44000,240.00,3,VS,fixture,0
+2026-08-24T19:35:42+00:00,etihad,premium,return,2027-05-21,44000,55.00,5,EY,fixture,0

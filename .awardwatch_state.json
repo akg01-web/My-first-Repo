@@ -1,0 +1,30 @@
+{
+  "history": [
+    {
+      "at": "2026-08-24T19:35:42.795464+00:00",
+      "miles": 88000,
+      "slot": "etihad|premium"
+    },
+    {
+      "at": "2026-08-24T19:35:42.795477+00:00",
+      "miles": 90000,
+      "slot": "virgin|premium"
+    },
+    {
+      "at": "2026-08-24T19:35:42.795489+00:00",
+      "miles": 155000,
+      "slot": "virgin|business"
+    },
+    {
+      "at": "2026-08-24T19:35:42.795501+00:00",
+      "miles": 200000,
+      "slot": "qatar_avios|business"
+    }
+  ],
+  "seen": {
+    "etihad|outbound|20270504|premium|44000+etihad|return|20270521|premium|44000": "2026-08-24T19:35:42.795461+00:00",
+    "qatar_avios|outbound|20270505|business|100000+qatar_avios|return|20270522|business|100000": "2026-08-24T19:35:42.795499+00:00",
+    "virgin|outbound|20270424|business|85000+virgin|return|20270511|business|70000": "2026-08-24T19:35:42.795488+00:00",
+    "virgin|outbound|20270503|premium|46000+virgin|return|20270520|premium|44000": "2026-08-24T19:35:42.795476+00:00"
+  }
+}

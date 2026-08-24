@@ -1,7 +1,7 @@
 <!-- awardwatch:report -->
 # Award watch: BOM to ORD, May 2027
 
-_Updated 2026-08-24 17:47 UTC_
+_Updated 2026-08-24 19:35 UTC_
 
 - Balance: **115,000 Amex India MR** (platinum_charge)
 - Outbound BOM-ORD: 2027-04-15..2027-05-05
@@ -78,4 +78,14 @@ Free manual checks (no API key needed):
 ## Run notes
 
 - qatar_avios has no premium cabin on this route; not searched.
+- DEAL: virgin|business|outbound|2027-05-05: availability appeared at 76,000 miles
+- DEAL: virgin|business|outbound|2027-04-24: availability appeared at 85,000 miles
+- DEAL: qatar_avios|business|outbound|2027-05-05: availability appeared at 100,000 miles
+- DEAL: asiamiles|business|outbound|2027-05-02: availability appeared at 130,000 miles
+- DEAL: virgin|premium|outbound|2027-05-03: availability appeared at 46,000 miles
+- DEAL: etihad|premium|outbound|2027-05-04: availability appeared at 44,000 miles
+- DEAL: virgin|business|return|2027-05-11: availability appeared at 70,000 miles
+- DEAL: virgin|business|return|2027-05-22: availability appeared at 82,000 miles
+- DEAL: qatar_avios|business|return|2027-05-22: availability appeared at 100,000 miles
+- DEAL: virgin|premium|return|2027-05-20: availability appeared at 44,000 miles
 - 1 programme/cabin combination(s) had availability but no pairing that satisfies the trip constraints.

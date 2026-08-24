@@ -3,10 +3,59 @@
 Polls award availability for a single trip and prices it against an Amex
 Membership Rewards balance. Built for one specific question:
 
-- **Trip:** Bombay (BOM) to Chicago (ORD) and back
-- **Dates:** 3 May 2027 out, 18 May 2027 back, +/- 2 days each
+- **Trip:** Bombay (BOM) to Chicago (ORD) and back, May 2027
+- **Fixed point:** a wedding in Chicago on **8 May 2027**
 - **Cabins:** business and premium economy (economy deliberately excluded)
-- **Balance:** 115,000 Amex **India** Membership Rewards
+- **Balance:** 115,000 Amex **India** Membership Rewards, Platinum Charge
+
+## The trip is defined by constraints, not by fixed dates
+
+There is no single departure date to search. The trip is pinned by an event and
+otherwise floats:
+
+- Be on the ground in Chicago **48 hours before the 8 May wedding**, so land by
+  **6 May**. Every BOM-ORD routing connects and spans a calendar day, so the
+  latest possible BOM departure is **5 May**.
+- The earliest the US can be left once the wedding is over is **11 May**.
+- At least **15 full non-flying days** on the ground, and those days may fall
+  before the wedding, after it, or be split across both.
+
+That last clause is what makes this interesting, because it admits two
+completely different trip shapes:
+
+| Shape | Leave BOM | Land ORD | Leave US | Full days |
+|---|---|---|---|---|
+| Days banked **after** the wedding | 5 May | 6 May | 22 May | 15 (7-21 May) |
+| Days banked **before** it | 24 Apr | 25 Apr | 11 May | 15 (26 Apr-10 May) |
+
+So the searchable space is BOM departures across **mid-April to 5 May** paired
+with ORD departures across **11 May to early June** -- roughly twenty times the
+span of a fixed date with a few days' slack either side. On a route where
+business space is the scarce resource, that width is the most valuable thing
+you have.
+
+The consequence for the code is that **the two halves can no longer be chosen
+independently.** The cheapest outbound may only pair with a return far enough
+after it to serve the 15 days. `rank.py` therefore walks every outbound/return
+combination, discards the illegal ones, and keeps the cheapest pairing that
+survives -- and the sample data is built so the cheapest arithmetic pairing is
+an illegal one, to keep that behaviour honest under test.
+
+All of it is config, in `trip.constraints`:
+
+```yaml
+constraints:
+  arrive_by: "2027-05-06"
+  depart_us_not_before: "2027-05-11"
+  min_full_days_in_us: 15
+  max_full_days_in_us: 30      # so the search does not propose a two-month trip
+  outbound_transit_days: 1     # leave the 5th, land the 6th
+  return_transit_days: 2
+```
+
+Anything ruled out by these gets its own table in the report with the reason,
+rather than silently vanishing -- "no legal pairing" and "no availability" are
+very different problems and you want to know which one you have.
 
 ## Read this before anything else
 
@@ -113,7 +162,8 @@ Everything lives in `config.yaml`. The fields worth revisiting:
 |---|---|
 | `points.card_tier` | Set to `platinum_charge`. Reverting to `standard` halves your usable miles. |
 | `points.bonus_pct` | Per-partner transfer bonus, e.g. `{etihad: 20}` |
-| `trip.*_window` | The +/- 2 days. Widen it and the odds improve sharply. |
+| `trip.*_window` | Search span. Widen it and the odds improve sharply. |
+| `trip.constraints` | The wedding anchor, the 15-day minimum, transit-day assumptions |
 | `alerts.max_miles_roundtrip` | Suppress everything above a mileage ceiling |
 
 ## Scheduling
@@ -138,3 +188,6 @@ becomes a record of how the price moved.
 - Award space for India-US in early May is thin and goes early. Polling from now
   is the right call; 2027 schedules are already inside most programmes' booking
   windows.
+- The transit-day assumptions are conservative round numbers, not a timetable.
+  Confirm the actual arrival date on any itinerary before booking -- a routing
+  that lands on 7 May instead of 6 May breaks the whole trip.

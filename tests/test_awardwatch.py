@@ -67,40 +67,120 @@ def test_fixture_provider_respects_the_window():
     assert all(r.direction == "outbound" and r.cabin == "business" for r in rows)
 
 
-def test_round_trip_pairs_the_cheapest_halves():
-    cfg = _cfg()
-    partners = transfers.load_partners(cfg.partners_path)
-    convs = {c.partner.key: c for c in transfers.convert_all(partners, cfg.mr_balance)}
-
-    options = []
+def _options(cfg, provider=None):
+    provider = provider or FixtureProvider()
+    out = []
     for direction in ("outbound", "return"):
         for cabin in cfg.trip.cabins:
-            options += FixtureProvider().search(cfg.trip, direction, cabin)
+            out += provider.search(cfg.trip, direction, cabin)
+    return out
 
-    trips = build_round_trips(options, convs)
-    fb_j = next(t for t in trips if t.program == "flyingblue" and t.cabin == "business")
-    # 76,000 is the cheaper of the two outbound business fixtures.
-    assert fb_j.out.miles == 76_000
-    assert fb_j.miles == 76_000 + 82_000
-    assert not fb_j.affordable
-    assert fb_j.gap == 158_000 - 57_500
+
+def _convs(cfg):
+    partners = transfers.load_partners(cfg.partners_path)
+    return {
+        c.partner.key: c
+        for c in transfers.convert_all(partners, cfg.mr_balance, cfg.card_tier)
+    }
+
+
+# --- trip constraints -------------------------------------------------------
+
+
+def test_full_days_excludes_both_travel_days():
+    c = _cfg().trip.constraints
+    # Leave BOM 5 May, land 6 May, leave the US 22 May -> 7..21 May on the ground.
+    assert c.full_days(dt.date(2027, 5, 5), dt.date(2027, 5, 22)) == 15
+
+
+def test_both_trip_shapes_are_legal():
+    c = _cfg().trip.constraints
+    # Days banked after the wedding.
+    assert c.check(dt.date(2027, 5, 5), dt.date(2027, 5, 22)) is None
+    # Days banked before it.
+    assert c.check(dt.date(2027, 4, 24), dt.date(2027, 5, 11)) is None
+
+
+def test_arrival_deadline_is_enforced():
+    c = _cfg().trip.constraints
+    # Leaving BOM on the 6th lands on the 7th, after the wedding deadline.
+    assert "after the 06 May deadline" in c.check(dt.date(2027, 5, 6), dt.date(2027, 5, 25))
+
+
+def test_cannot_leave_before_the_wedding_is_over():
+    c = _cfg().trip.constraints
+    assert "before 11 May" in c.check(dt.date(2027, 4, 20), dt.date(2027, 5, 9))
+
+
+def test_short_stay_is_rejected():
+    c = _cfg().trip.constraints
+    assert "need 15" in c.check(dt.date(2027, 5, 5), dt.date(2027, 5, 15))
+
+
+def test_overlong_stay_is_rejected():
+    c = _cfg().trip.constraints
+    assert "over the 30" in c.check(dt.date(2027, 4, 15), dt.date(2027, 6, 5))
+
+
+# --- constraint-aware pairing ----------------------------------------------
+
+
+def test_cheapest_pairing_is_skipped_when_it_is_illegal():
+    cfg = _cfg()
+    trips, _ = build_round_trips(_options(cfg), _convs(cfg), cfg.trip.constraints)
+    fb = next(t for t in trips if t.program == "flyingblue" and t.cabin == "business")
+
+    # 76,000 out (5 May) + 70,000 back (11 May) is the cheapest arithmetic
+    # pairing at 146,000, but it leaves only 4 full days on the ground.
+    assert fb.miles == 155_000
+    assert (fb.out.date, fb.back.date) == (dt.date(2027, 4, 24), dt.date(2027, 5, 11))
+    assert fb.full_days == 15
+
+
+def test_every_returned_trip_satisfies_the_constraints():
+    cfg = _cfg()
+    trips, _ = build_round_trips(_options(cfg), _convs(cfg), cfg.trip.constraints)
+    assert trips
+    for t in trips:
+        assert cfg.trip.constraints.check(t.out.date, t.back.date) is None
+        assert t.full_days >= cfg.trip.constraints.min_full_days_in_us
+
+
+def test_missing_return_leg_is_reported_not_dropped():
+    cfg = _cfg()
+    _, rejections = build_round_trips(_options(cfg), _convs(cfg), cfg.trip.constraints)
+    ks = next(r for r in rejections if r.program == "krisflyer")
+    assert ks.reason == "no return availability"
+
+
+def test_platinum_charge_covers_premium_but_not_business():
+    cfg = _cfg()
+    trips, _ = build_round_trips(_options(cfg), _convs(cfg), cfg.trip.constraints)
+    by_cabin = {(t.program, t.cabin): t for t in trips}
+    assert by_cabin[("etihad", "premium")].affordable
+    assert not by_cabin[("etihad", "business")].affordable
+    assert by_cabin[("etihad", "business")].gap == 175_000 - 115_000
 
 
 def test_estimates_never_outrank_live_availability():
     cfg = _cfg()
-    partners = transfers.load_partners(cfg.partners_path)
-    convs = {c.partner.key: c for c in transfers.convert_all(partners, cfg.mr_balance)}
+    convs = _convs(cfg)
     baselines = estimate.load_baselines(cfg.baselines_path)
 
     options = estimate.estimated_options(cfg.trip, baselines, list(convs))
-    for direction in ("outbound", "return"):
-        for cabin in cfg.trip.cabins:
-            options += FixtureProvider().search(cfg.trip, direction, cabin)
+    options += _options(cfg)
 
-    trips = build_round_trips(options, convs)
+    trips, _ = build_round_trips(options, convs, cfg.trip.constraints)
     live = [i for i, t in enumerate(trips) if not t.estimated]
     est = [i for i, t in enumerate(trips) if t.estimated]
     assert max(live) < min(est)
+
+
+def test_estimator_anchors_to_a_legal_pairing():
+    cfg = _cfg()
+    anchors = estimate.anchor_dates(cfg.trip)
+    assert anchors is not None
+    assert cfg.trip.constraints.check(*anchors) is None
 
 
 def test_mr_needed_rounds_up_to_a_whole_block():

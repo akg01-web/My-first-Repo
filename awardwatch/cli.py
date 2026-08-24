@@ -43,7 +43,7 @@ def run(config_path: str, dry_run: bool, out_path: str | None) -> int:
         baselines = estimate.load_baselines(cfg.baselines_path)
         options = estimate.estimated_options(cfg.trip, baselines, list(by_key))
 
-    trips = build_round_trips(options, by_key)
+    trips, rejections = build_round_trips(options, by_key, cfg.trip.constraints)
 
     state = State(cfg.state_path)
     new_keys: set[str] = set()
@@ -59,11 +59,17 @@ def run(config_path: str, dry_run: bool, out_path: str | None) -> int:
                 f"{trip.program} {trip.cabin} dropped {previous:,} -> {trip.miles:,} miles."
             )
 
+    if rejections:
+        notes.append(
+            f"{len(rejections)} programme/cabin combination(s) had availability but no "
+            "pairing that satisfies the trip constraints."
+        )
+
     ceiling = cfg.alerts.get("max_miles_roundtrip")
     if ceiling:
         trips = [t for t in trips if t.miles <= int(ceiling)]
 
-    body = report.render(cfg, conversions, trips, new_keys, notes)
+    body = report.render(cfg, conversions, trips, new_keys, notes, rejections)
 
     if out_path:
         target = Path(out_path)

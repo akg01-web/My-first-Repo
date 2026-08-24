@@ -6,7 +6,7 @@ import datetime as dt
 
 from .config import Config
 from .links import program_link, seats_aero_link
-from .rank import RoundTrip
+from .rank import Rejection, RoundTrip
 from .transfers import Conversion
 
 MARKER = "<!-- awardwatch:report -->"
@@ -36,10 +36,11 @@ def transfer_table(conversions: list[Conversion]) -> str:
 
 def trip_table(trips: list[RoundTrip], limit: int) -> str:
     if not trips:
-        return "_No options found on this run._"
+        return "_No legal round trip found on this run._"
     lines = [
-        "| | Programme | Cabin | Out | Back | Round-trip miles | Taxes | vs balance |",
-        "|:--:|---|---|---|---|---:|---:|---|",
+        "| | Programme | Cabin | Leave BOM | Land ORD | Leave US | Days in US "
+        "| Round-trip miles | Taxes | vs balance |",
+        "|:--:|---|---|---|---|---|---:|---:|---:|---|",
     ]
     for t in trips[:limit]:
         flag = "OK" if t.affordable else "short"
@@ -47,9 +48,39 @@ def trip_table(trips: list[RoundTrip], limit: int) -> str:
         tag = " _(est)_" if t.estimated else ""
         lines.append(
             f"| {flag} | {t.program}{tag} | {t.cabin} | {t.out.date:%d %b} | "
-            f"{t.back.date:%d %b} | {t.miles:,} | {_fmt_taxes(t.taxes_usd)} | {verdict} |"
+            f"{t.arrival_date:%d %b} | {t.back.date:%d %b} | {t.full_days} | "
+            f"{t.miles:,} | {_fmt_taxes(t.taxes_usd)} | {verdict} |"
         )
     return "\n".join(lines)
+
+
+def rejection_table(rejections: list[Rejection]) -> str:
+    if not rejections:
+        return ""
+    lines = [
+        "",
+        "### Ruled out by the trip constraints",
+        "",
+        "| Programme | Cabin | Why |",
+        "|---|---|---|",
+    ]
+    for r in rejections:
+        lines.append(f"| {r.program} | {r.cabin} | {r.reason} |")
+    return "\n".join(lines) + "\n"
+
+
+def constraints_block(cfg: Config) -> str:
+    c = cfg.trip.constraints
+    rows = []
+    if c.arrive_by:
+        rows.append(f"- On the ground in {cfg.trip.destination} by **{c.arrive_by:%d %b %Y}**")
+    if c.depart_us_not_before:
+        rows.append(f"- Cannot leave the US before **{c.depart_us_not_before:%d %b %Y}**")
+    span = f"at least **{c.min_full_days_in_us}**"
+    if c.max_full_days_in_us is not None:
+        span += f" and at most {c.max_full_days_in_us}"
+    rows.append(f"- {span} full non-flying days on the ground, either side of the event")
+    return "\n".join(rows)
 
 
 def links_section(cfg: Config, programs: list[str]) -> str:
@@ -77,6 +108,7 @@ def render(
     trips: list[RoundTrip],
     new_keys: set[str],
     notes: list[str],
+    rejections: list[Rejection] | None = None,
 ) -> str:
     now = dt.datetime.now(dt.timezone.utc)
     programs = [c.partner.key for c in conversions]
@@ -96,12 +128,18 @@ def render(
         f"- Cabins: {', '.join(cfg.trip.cabins)}",
         f"- Best convertible balance: **{max((c.miles for c in conversions), default=0):,} miles**",
         "",
+        "**Trip constraints**",
+        "",
+        constraints_block(cfg),
+        "",
     ]
 
     if best:
         status = (
-            f"Cheapest round trip found is **{best.miles:,} miles** ({best.program}, "
-            f"{best.cabin}){' - estimate only' if best.estimated else ''}. "
+            f"Cheapest legal round trip is **{best.miles:,} miles** ({best.program}, "
+            f"{best.cabin}){' - estimate only' if best.estimated else ''}: "
+            f"leave BOM {best.out.date:%d %b}, land {best.arrival_date:%d %b}, "
+            f"leave the US {best.back.date:%d %b}, {best.full_days} full days. "
         )
         status += (
             f"{len(affordable)} of {len(trips)} options are covered by the balance."
@@ -118,6 +156,7 @@ def render(
         "",
         trip_table(trips, int(cfg.alerts.get("max_rows", 30))),
         "",
+        rejection_table(rejections or []),
     ]
     if not live:
         parts += [

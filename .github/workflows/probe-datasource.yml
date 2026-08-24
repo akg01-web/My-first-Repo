@@ -10,6 +10,12 @@ name: probe-datasource
 
 on:
   workflow_dispatch:
+  # Also runs on any push that touches the probe itself, so a change to it is
+  # validated immediately rather than lying broken until someone runs it.
+  push:
+    paths:
+      - ".github/workflows/probe-datasource.yml"
+      - "scripts/probe_contract.py"
 
 permissions:
   contents: read
@@ -67,10 +73,16 @@ jobs:
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: End-to-end run against live data
-        if: ${{ secrets.SEATS_AERO_API_KEY != '' }}
         env:
           SEATS_AERO_API_KEY: ${{ secrets.SEATS_AERO_API_KEY }}
         run: |
+          # Guarded in the shell rather than in `if:` -- the secrets context is
+          # not available to step-level conditions, and referencing it there
+          # invalidates the whole workflow file.
+          if [ -z "$SEATS_AERO_API_KEY" ]; then
+            echo "No key set; skipping the live run." >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
           pip install -r requirements.txt
           {
             echo ""

@@ -522,3 +522,47 @@ def test_unverified_routes_are_flagged_as_such():
     # Concierge confirmed the airline edges; the Marriott chain is inference.
     assert routes["virgin"].verified
     assert not routes["united"].verified
+
+
+# --- workflow validity -------------------------------------------------------
+
+
+def _workflows():
+    import yaml
+    root = config.REPO_ROOT / ".github" / "workflows"
+    return {p.name: (p.read_text(), yaml.safe_load(p.read_text())) for p in root.glob("*.yml")}
+
+
+def test_workflows_are_valid_yaml():
+    assert _workflows(), "no workflows found"
+
+
+def test_no_workflow_references_secrets_in_a_step_condition():
+    """GitHub rejects the entire file, and every run fails instantly with zero jobs.
+
+    This cost six silent failures before anyone looked, because a workflow that
+    never starts produces no job logs to read.
+    """
+    import re
+    offenders = []
+    for name, (text, _) in _workflows().items():
+        for lineno, line in enumerate(text.splitlines(), 1):
+            if re.search(r"^\s*if:.*secrets\.", line):
+                offenders.append(f"{name}:{lineno}")
+    assert not offenders, f"secrets context used in a step condition: {offenders}"
+
+
+def test_scheduled_workflow_does_not_enable_the_fixture_provider():
+    """The 19:35 run wrote fixture rows into the observation log as real data."""
+    import yaml
+    cfg = yaml.safe_load((config.REPO_ROOT / "config.yaml").read_text())
+    assert "fixture" not in (cfg.get("providers") or [])
+
+
+def test_no_fabricated_rows_in_the_committed_observation_log():
+    from awardwatch import observations
+    path = config.REPO_ROOT / "data" / "observations.csv"
+    if not path.exists():
+        return  # nothing collected yet
+    bad = [o for o in observations.load(path) if o.source not in {"seatsaero"}]
+    assert not bad, f"{len(bad)} row(s) from a non-live source: {sorted({o.source for o in bad})}"

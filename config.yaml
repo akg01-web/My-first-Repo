@@ -1,0 +1,59 @@
+# Amex India Membership Rewards -> award miles watcher
+# Everything here is user-editable. Ratios and award costs MUST be verified
+# against the live programme sites before you transfer anything (see README).
+
+points:
+  # Your Membership Rewards balance.
+  amex_in_mr: 115000
+  # "standard"        -> MRCC / Gold Charge / Platinum Travel / Platinum Reserve
+  # "platinum_charge" -> Amex India Platinum Charge (better ratios on some partners)
+  card_tier: platinum_charge
+  # Live transfer-bonus promos, e.g. {krisflyer: 20} for a 20% bonus.
+  bonus_pct: {}
+
+trip:
+  origin: BOM
+  destination: ORD
+  passengers: 1
+  # Cabins to track. Economy deliberately excluded.
+  cabins: [business, premium]
+
+  # Search windows. These are deliberately wide -- the constraints block below
+  # is what makes a pairing legal, not the window edges. A wider window is the
+  # single cheapest way to improve the odds of finding business space.
+  outbound_window: {start: "2027-04-15", end: "2027-05-05"}
+  return_window:   {start: "2027-05-11", end: "2027-06-05"}
+
+  constraints:
+    # Wedding is 8 May in Chicago; must be on the ground 48h ahead.
+    arrive_by: "2027-05-06"
+    # Wedding is over; earliest the US can be left.
+    depart_us_not_before: "2027-05-11"
+    # At least this many full, non-flying days on the ground in the US.
+    # These may fall before the wedding, after it, or be split across both.
+    min_full_days_in_us: 15
+    # Upper bound, so the search does not propose a two-month trip. Raise or
+    # set to null if a longer stay is fine.
+    max_full_days_in_us: 30
+    # BOM-ORD always connects and spans a calendar day: leave the 5th, land
+    # the 6th. Eastbound is usually two.
+    outbound_transit_days: 1
+    return_transit_days: 2
+
+providers:
+  # seatsaero is skipped automatically unless SEATS_AERO_API_KEY is set.
+  - seatsaero
+  # fixture reads tests/fixtures/*.json so the pipeline runs with no API key.
+  - fixture
+
+alerts:
+  github_issue: true
+  issue_title: "Award watch: BOM <-> ORD, May 2027"
+  # Only alert on options at or below this round-trip mileage. null = alert on all.
+  max_miles_roundtrip: null
+  max_rows: 30
+
+paths:
+  partners: data/amex_in_partners.yaml
+  baselines: data/award_baselines.yaml
+  state: .awardwatch_state.json

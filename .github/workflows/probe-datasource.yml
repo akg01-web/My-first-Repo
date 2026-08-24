@@ -1,0 +1,82 @@
+name: probe-datasource
+
+# Proves -- before anyone pays for anything -- whether the award data source is
+# reachable and what its API actually returns.
+#
+# This exists because the Claude session that wrote this repository runs behind
+# a strict network egress allowlist and cannot reach seats.aero, any airline, or
+# any award aggregator. GitHub's runners have no such restriction, so this is
+# the only honest way to validate the client: run it here and read the output.
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Reachability
+        run: |
+          {
+            echo "### Reachability from a GitHub runner"
+            echo ""
+            echo "| Host | HTTP |"
+            echo "|---|---|"
+          } >> "$GITHUB_STEP_SUMMARY"
+          for host in seats.aero developers.seats.aero www.virginatlantic.com \
+                      www.qatarairways.com www.britishairways.com; do
+            code=$(curl -sS -o /dev/null -w '%{http_code}' --max-time 20 "https://$host/" || echo "unreachable")
+            echo "| $host | $code |" >> "$GITHUB_STEP_SUMMARY"
+          done
+
+      - name: Partner API contract
+        env:
+          SEATS_AERO_API_KEY: ${{ secrets.SEATS_AERO_API_KEY }}
+        run: |
+          {
+            echo ""
+            echo "### Partner API contract"
+            echo ""
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          if [ -z "$SEATS_AERO_API_KEY" ]; then
+            {
+              echo "No \`SEATS_AERO_API_KEY\` secret is set, so the authenticated"
+              echo "endpoint was not called. The table above still shows whether a"
+              echo "key would be usable from here."
+            } >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+
+          url="https://seats.aero/partnerapi/search?origin_airport=BOM&destination_airport=ORD&start_date=2027-05-04&end_date=2027-05-05&take=3"
+          code=$(curl -sS -o /tmp/probe.json -w '%{http_code}' --max-time 30 \
+                 -H "Partner-Authorization: $SEATS_AERO_API_KEY" \
+                 -H "Accept: application/json" "$url" || echo "000")
+
+          {
+            echo "HTTP status: \`$code\`"
+            echo ""
+            echo '```'
+            python3 scripts/probe_contract.py /tmp/probe.json || true
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: End-to-end run against live data
+        if: ${{ secrets.SEATS_AERO_API_KEY != '' }}
+        env:
+          SEATS_AERO_API_KEY: ${{ secrets.SEATS_AERO_API_KEY }}
+        run: |
+          pip install -r requirements.txt
+          {
+            echo ""
+            echo "### Full pipeline against live availability"
+            echo ""
+            echo '```'
+            python -m awardwatch --dry-run --optimize cash 2>&1 | head -60
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"

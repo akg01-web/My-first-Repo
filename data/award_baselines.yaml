@@ -1,0 +1,38 @@
+# ESTIMATED one-way award cost, BOM -> ORD, per programme, per cabin.
+#
+# !! LOW CONFIDENCE. READ THIS. !!
+# Unlike the transfer ratios in amex_in_partners.yaml -- which are confirmed --
+# nothing below has been verified against a live award search. They are rough
+# planning figures so the tool can say "roughly how far does this balance go"
+# before any live data source is wired up, and they are the weakest numbers in
+# this repository.
+#
+# Three of these programmes (Virgin, Qatar Privilege Club, Etihad) price
+# dynamically, which means there is no chart to be right about: the same seat
+# can differ by 2x between two dates. Any live provider result overrides these
+# immediately, and estimated rows are tagged `(est)` in the report so they are
+# never mistaken for something bookable.
+#
+# taxes_usd is per person, one way, and is the part people forget.
+
+baselines:
+  # Surcharges below are VERIFIED (Aug 2026); the mileage figures are not.
+  virgin:
+    business: {miles: 95000, taxes_usd: 586}
+    premium:  {miles: 55000, taxes_usd: 240}
+  qatar_avios:
+    # No carrier-imposed surcharge: government taxes plus a distance-based
+    # redemption fee. No true premium cabin, so no premium row.
+    business: {miles: 105000, taxes_usd: 85}
+  ba_avios:
+    business: {miles: 125000, taxes_usd: 180}
+    premium:  {miles: 75000, taxes_usd: 150}
+  etihad:
+    business: {miles: 88000, taxes_usd: 130}
+    premium:  {miles: 55000, taxes_usd: 110}
+  asiamiles:
+    business: {miles: 130000, taxes_usd: 120}
+    premium:  {miles: 85000, taxes_usd: 100}
+  krisflyer:
+    business: {miles: 110000, taxes_usd: 100}
+    premium:  {miles: 70000, taxes_usd: 90}

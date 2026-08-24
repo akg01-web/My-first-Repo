@@ -7,7 +7,7 @@ import sys
 from pathlib import Path
 
 from . import config as config_mod
-from . import estimate, notify, providers, report, transfers
+from . import baseline, estimate, notify, observations, providers, report, transfers
 from .rank import build_round_trips
 from .state import State
 
@@ -62,6 +62,28 @@ def run(config_path: str, dry_run: bool, out_path: str | None, optimize: str = "
             and o.cabin not in by_key[o.program].partner.cabins_available
         )
     ]
+
+    # Log every confirmed observation before anything is ranked or filtered:
+    # the baseline must reflect what was actually offered, not what survived
+    # this run's trip constraints.
+    log_path = cfg.state_path.parent / "data" / "observations.csv"
+    fresh = observations.from_options([o for o in options if not o.estimated])
+    history = observations.load(log_path)
+    bases = baseline.build(history)
+
+    deals = baseline.find_deals(fresh, bases)
+    established, total = baseline.coverage(bases, min_rows=24, min_hours=48.0)
+    if total:
+        notes.append(
+            f"Baseline: {established}/{total} slots have enough history to judge "
+            f"against (need 24+ observations over 48+ hours)."
+        )
+    for deal in deals[:10]:
+        notes.append(f"DEAL: {deal.describe()}")
+
+    if not dry_run and fresh:
+        written = observations.append(log_path, fresh)
+        print(f"[log] appended {written} observation(s) to {log_path}")
 
     trips, rejections = build_round_trips(
         options, by_key, cfg.trip.constraints, optimize

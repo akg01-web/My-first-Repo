@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import datetime as dt
+import pathlib
 import sys
 from pathlib import Path
 
@@ -247,3 +248,132 @@ if __name__ == "__main__":
                 print(f"FAIL {name}: {exc}")
     print(f"\n{failures} failure(s)")
     sys.exit(1 if failures else 0)
+
+
+# --- observation log and baselines -------------------------------------------
+
+
+def _obs(slot_miles, program="virgin", cabin="premium", direction="outbound",
+         flight="2027-05-03", start=None, step_hours=1, estimated=False):
+    """Build a run of observations one hour apart for a single slot."""
+    from awardwatch.observations import Observation
+    start = start or dt.datetime(2026, 8, 20, tzinfo=dt.timezone.utc)
+    return [
+        Observation(
+            observed_at=start + dt.timedelta(hours=i * step_hours),
+            program=program, cabin=cabin, direction=direction,
+            flight_date=dt.date.fromisoformat(flight),
+            miles=m, taxes_usd=240.0, seats=2, carrier="VS",
+            source="fixture", estimated=estimated,
+        )
+        for i, m in enumerate(slot_miles)
+    ]
+
+
+def test_observation_log_round_trips(tmp_path=None):
+    import tempfile
+    from awardwatch import observations
+    with tempfile.TemporaryDirectory() as d:
+        path = pathlib.Path(d) / "obs.csv"
+        rows = _obs([90000, 90000, 88000])
+        assert observations.append(path, rows) == 3
+        assert observations.append(path, _obs([87000])) == 1
+
+        back = observations.load(path)
+        assert len(back) == 4
+        assert [o.miles for o in back] == [90000, 90000, 88000, 87000]
+        assert back[0].slot == "virgin|premium|outbound|2027-05-03"
+        # Header written exactly once despite two appends.
+        assert path.read_text().count("observed_at,program") == 1
+
+
+def test_malformed_row_does_not_destroy_history():
+    import tempfile
+    from awardwatch import observations
+    with tempfile.TemporaryDirectory() as d:
+        path = pathlib.Path(d) / "obs.csv"
+        observations.append(path, _obs([90000, 88000]))
+        with path.open("a") as fh:
+            fh.write("garbage,not,a,valid,row\n")
+        assert len(observations.load(path)) == 2
+
+
+def test_estimates_are_excluded_from_baselines():
+    from awardwatch import baseline
+    rows = _obs([90000] * 5, estimated=True)
+    assert baseline.build(rows) == {}
+
+
+def test_baseline_uses_median_not_mean():
+    from awardwatch import baseline
+    # One absurd outlier would drag a mean; the median ignores it.
+    b = baseline.build(_obs([90000, 90000, 90000, 90000, 900000]))
+    slot = next(iter(b))
+    assert b[slot].median_miles == 90000
+    assert b[slot].worst_seen == 900000
+
+
+def test_baseline_needs_enough_history_before_flagging():
+    from awardwatch import baseline
+    history = _obs([90000] * 5)          # only 5 hours of data
+    bases = baseline.build(history)
+    current = _obs([70000], start=dt.datetime(2026, 8, 21, tzinfo=dt.timezone.utc))
+    assert baseline.find_deals(current, bases, min_rows=24, min_hours=48) == []
+
+
+def test_flat_slot_still_flags_a_real_drop():
+    """The common case: a price that never moved, so MAD is zero."""
+    from awardwatch import baseline
+    history = _obs([90000] * 72)         # 72 hours, never moved
+    bases = baseline.build(history)
+    slot = next(iter(bases))
+    assert bases[slot].spread == 0
+
+    current = _obs([70000], start=dt.datetime(2026, 8, 24, tzinfo=dt.timezone.utc))
+    deals = baseline.find_deals(current, bases)
+    assert len(deals) == 1
+    assert deals[0].kind == "price_drop"
+    assert deals[0].z is None                       # floor decided, not a z-score
+    assert round(deals[0].drop_pct, 4) == 0.2222
+
+
+def test_trivial_drop_on_a_flat_slot_is_not_a_deal():
+    from awardwatch import baseline
+    bases = baseline.build(_obs([90000] * 72))
+    current = _obs([89500], start=dt.datetime(2026, 8, 24, tzinfo=dt.timezone.utc))
+    assert baseline.find_deals(current, bases) == []
+
+
+def test_statistically_large_but_economically_trivial_is_not_a_deal():
+    from awardwatch import baseline
+    # Noisy by a few hundred miles: a 2,000-mile drop is many MADs but ~2%.
+    history = _obs([90000, 90200, 89800, 90100, 89900] * 15)
+    bases = baseline.build(history)
+    current = _obs([88000], start=dt.datetime(2026, 8, 24, tzinfo=dt.timezone.utc))
+    assert baseline.find_deals(current, bases) == []
+
+
+def test_new_availability_is_reported_separately_from_a_drop():
+    from awardwatch import baseline
+    bases = baseline.build(_obs([90000] * 72))
+    fresh = _obs([120000], flight="2027-05-04",
+                 start=dt.datetime(2026, 8, 24, tzinfo=dt.timezone.utc))
+    deals = baseline.find_deals(fresh, bases)
+    assert len(deals) == 1
+    assert deals[0].kind == "new_availability"
+    assert "availability appeared" in deals[0].describe()
+
+
+def test_price_drops_rank_above_new_availability():
+    from awardwatch import baseline
+    bases = baseline.build(_obs([90000] * 72))
+    now = dt.datetime(2026, 8, 24, tzinfo=dt.timezone.utc)
+    current = _obs([120000], flight="2027-05-04", start=now) + _obs([70000], start=now)
+    kinds = [d.kind for d in baseline.find_deals(current, bases)]
+    assert kinds == ["price_drop", "new_availability"]
+
+
+def test_coverage_counts_only_established_slots():
+    from awardwatch import baseline
+    bases = baseline.build(_obs([90000] * 72) + _obs([50000] * 3, flight="2027-05-04"))
+    assert baseline.coverage(bases, min_rows=24, min_hours=48) == (1, 2)

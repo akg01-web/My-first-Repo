@@ -1,0 +1,29 @@
+# ESTIMATED one-way award cost, BOM -> ORD, per programme, per cabin.
+#
+# These are planning baselines ONLY. They are not live prices and several of
+# these programmes are fully dynamic, meaning the real number can swing by 2x
+# on the same route between two dates. They exist so the tool can tell you
+# roughly how far 115k MR gets you before you have any live data source wired
+# up. Live provider results always override these.
+#
+# taxes_usd is per person, one way, and is the part people forget.
+
+baselines:
+  krisflyer:
+    business: {miles: 95000, taxes_usd: 90}
+    premium:  {miles: 62000, taxes_usd: 80}
+  emirates:
+    business: {miles: 105000, taxes_usd: 300}
+    premium:  {miles: 72500, taxes_usd: 220}
+  etihad:
+    business: {miles: 88000, taxes_usd: 130}
+    premium:  {miles: 55000, taxes_usd: 110}
+  ba_avios:
+    business: {miles: 100000, taxes_usd: 180}
+    premium:  {miles: 62500, taxes_usd: 150}
+  flyingblue:
+    business: {miles: 88000, taxes_usd: 250}
+    premium:  {miles: 55000, taxes_usd: 200}
+  maharaja:
+    business: {miles: 90000, taxes_usd: 120}
+    premium:  {miles: 60000, taxes_usd: 100}

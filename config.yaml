@@ -1,0 +1,40 @@
+# Amex India Membership Rewards -> award miles watcher
+# Everything here is user-editable. Ratios and award costs MUST be verified
+# against the live programme sites before you transfer anything (see README).
+
+points:
+  # Your Membership Rewards balance.
+  amex_in_mr: 115000
+  # "standard"        -> MRCC / Gold Charge / Platinum Travel / Platinum Reserve
+  # "platinum_charge" -> Amex India Platinum Charge (better ratios on some partners)
+  card_tier: standard
+  # Live transfer-bonus promos, e.g. {krisflyer: 20} for a 20% bonus.
+  bonus_pct: {}
+
+trip:
+  origin: BOM
+  destination: ORD
+  passengers: 1
+  # "May 3rd 2027 to May 18th 2027 (+/- 2 days)"
+  outbound_window: {start: "2027-05-01", end: "2027-05-05"}
+  return_window:   {start: "2027-05-16", end: "2027-05-20"}
+  # Cabins to track. Economy deliberately excluded.
+  cabins: [business, premium]
+
+providers:
+  # seatsaero is skipped automatically unless SEATS_AERO_API_KEY is set.
+  - seatsaero
+  # fixture reads tests/fixtures/*.json so the pipeline runs with no API key.
+  - fixture
+
+alerts:
+  github_issue: true
+  issue_title: "Award watch: BOM <-> ORD, May 2027"
+  # Only alert on options at or below this round-trip mileage. null = alert on all.
+  max_miles_roundtrip: null
+  max_rows: 30
+
+paths:
+  partners: data/amex_in_partners.yaml
+  baselines: data/award_baselines.yaml
+  state: .awardwatch_state.json

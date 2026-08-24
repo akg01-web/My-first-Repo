@@ -1,0 +1,11 @@
+[
+  {"program": "flyingblue", "direction": "outbound", "date": "2027-05-02", "cabin": "business", "miles": 88000, "taxes_usd": 245, "seats": 2, "carrier": "AF"},
+  {"program": "flyingblue", "direction": "outbound", "date": "2027-05-04", "cabin": "business", "miles": 76000, "taxes_usd": 245, "seats": 1, "carrier": "KL"},
+  {"program": "flyingblue", "direction": "return",   "date": "2027-05-17", "cabin": "business", "miles": 82000, "taxes_usd": 90,  "seats": 2, "carrier": "AF"},
+  {"program": "flyingblue", "direction": "outbound", "date": "2027-05-03", "cabin": "premium",  "miles": 52000, "taxes_usd": 195, "seats": 4, "carrier": "AF"},
+  {"program": "flyingblue", "direction": "return",   "date": "2027-05-18", "cabin": "premium",  "miles": 50000, "taxes_usd": 80,  "seats": 3, "carrier": "AF"},
+  {"program": "etihad",     "direction": "outbound", "date": "2027-05-01", "cabin": "business", "miles": 87500, "taxes_usd": 125, "seats": 2, "carrier": "EY"},
+  {"program": "etihad",     "direction": "return",   "date": "2027-05-20", "cabin": "business", "miles": 87500, "taxes_usd": 60,  "seats": 2, "carrier": "EY"},
+  {"program": "etihad",     "direction": "outbound", "date": "2027-05-05", "cabin": "premium",  "miles": 44000, "taxes_usd": 105, "seats": 5, "carrier": "EY"},
+  {"program": "etihad",     "direction": "return",   "date": "2027-05-16", "cabin": "premium",  "miles": 44000, "taxes_usd": 55,  "seats": 5, "carrier": "EY"}
+]

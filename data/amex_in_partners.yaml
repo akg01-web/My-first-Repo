@@ -1,0 +1,97 @@
+# Amex INDIA Membership Rewards airline transfer partners.
+#
+# !! READ THIS !!
+# Every ratio below is marked `verified: false`. Amex India changes its partner
+# roster and ratios without much notice, and ratios differ by card. Confirm on
+# americanexpress.com/in (Membership Rewards -> Transfer to airline partner)
+# before you move a single point. Transfers are IRREVERSIBLE.
+#
+# ratio: mr -> miles. `1000 -> 500` means 2 MR buys 1 mile.
+# Set `verified: true` and update `last_checked` once you have confirmed a row.
+
+partners:
+  - key: krisflyer
+    name: Singapore Airlines KrisFlyer
+    alliance: Star Alliance
+    ratio: {standard: [1000, 500], platinum_charge: [1000, 1000]}
+    min_transfer_mr: 1000
+    increment_mr: 1000
+    verified: false
+    last_checked: null
+    award_search_url: "https://www.singaporeair.com/en_UK/us/ppsclub-krisflyer/"
+    notes: >-
+      SQ does not serve ORD. Any BOM-ORD redemption is a Star Alliance partner
+      award (e.g. via FRA/ZRH/EWR), which prices higher than SQ-metal saver and
+      has thinner partner space. Star J to the US midwest is hard in May.
+
+  - key: emirates
+    name: Emirates Skywards
+    alliance: none
+    ratio: {standard: [1000, 500], platinum_charge: [1000, 1000]}
+    min_transfer_mr: 1000
+    increment_mr: 1000
+    verified: false
+    last_checked: null
+    award_search_url: "https://www.emirates.com/in/english/"
+    notes: >-
+      BOM-DXB-ORD on Emirates metal, daily. Good availability, but Skywards
+      levies very heavy carrier-imposed surcharges on India-US business
+      (commonly USD 350-600 per person round trip). Check the cash cost before
+      you get excited about the mileage number.
+
+  - key: etihad
+    name: Etihad Guest
+    alliance: none
+    ratio: {standard: [1000, 500], platinum_charge: [1000, 1000]}
+    min_transfer_mr: 1000
+    increment_mr: 1000
+    verified: false
+    last_checked: null
+    award_search_url: "https://www.etihad.com/en-in/"
+    notes: >-
+      BOM-AUH-ORD on Etihad metal. Etihad Guest went dynamic; the old fixed
+      chart sweet spots are largely gone, but off-peak dates still surface
+      well-priced J. Surcharges lower than Emirates.
+
+  - key: ba_avios
+    name: British Airways Executive Club (Avios)
+    alliance: oneworld
+    ratio: {standard: [1000, 500], platinum_charge: [1000, 1000]}
+    min_transfer_mr: 1000
+    increment_mr: 1000
+    verified: false
+    last_checked: null
+    award_search_url: "https://www.britishairways.com/travel/redeem/execclub/"
+    notes: >-
+      Best used for Qatar metal BOM-DOH-ORD, priced per-segment on the Avios
+      distance chart. Avoid routing over LHR - the UK APD on a business-class
+      departure is roughly GBP 200+ per person.
+
+  - key: flyingblue
+    name: Air France-KLM Flying Blue
+    alliance: SkyTeam
+    ratio: {standard: [1000, 500], platinum_charge: [1000, 1000]}
+    min_transfer_mr: 1000
+    increment_mr: 1000
+    verified: false
+    last_checked: null
+    award_search_url: "https://www.flyingblue.com/en/"
+    notes: >-
+      BOM-CDG/AMS-ORD. Fully dynamic pricing, so the number moves daily - this
+      is the single best partner to poll frequently. Monthly Promo Rewards cut
+      selected routes 25-50%; if BOM or ORD shows up in a Promo Reward month
+      that is the most realistic path to J on this balance.
+
+  - key: maharaja
+    name: Air India Maharaja Club
+    alliance: Star Alliance
+    ratio: {standard: [1000, 500], platinum_charge: [1000, 1000]}
+    min_transfer_mr: 1000
+    increment_mr: 1000
+    verified: false
+    last_checked: null
+    award_search_url: "https://www.airindia.com/in/en/maharajaclub.html"
+    notes: >-
+      Absorbed Club Vistara in 2024, so an old Vistara transfer option in your
+      Amex account may now point here. AI has no BOM-ORD nonstop; DEL-ORD
+      nonstop exists, so BOM-DEL-ORD is the natural routing.

@@ -79,6 +79,26 @@
       "at": "2026-08-24T22:34:21.925262+00:00",
       "miles": 200000,
       "slot": "qatar_avios|business"
+    },
+    {
+      "at": "2026-08-24T23:28:14.553683+00:00",
+      "miles": 88000,
+      "slot": "etihad|premium"
+    },
+    {
+      "at": "2026-08-24T23:28:14.553699+00:00",
+      "miles": 90000,
+      "slot": "virgin|premium"
+    },
+    {
+      "at": "2026-08-24T23:28:14.553711+00:00",
+      "miles": 155000,
+      "slot": "virgin|business"
+    },
+    {
+      "at": "2026-08-24T23:28:14.553722+00:00",
+      "miles": 200000,
+      "slot": "qatar_avios|business"
     }
   ],
   "seen": {

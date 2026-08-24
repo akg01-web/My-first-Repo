@@ -1,7 +1,7 @@
 <!-- awardwatch:report -->
 # Award watch: BOM to ORD, May 2027
 
-_Updated 2026-08-24 22:34 UTC_
+_Updated 2026-08-24 23:28 UTC_
 
 - Balance: **115,000 Amex India MR** (platinum_charge)
 - Outbound BOM-ORD: 2027-04-15..2027-05-05

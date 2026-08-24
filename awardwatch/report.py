@@ -7,6 +7,7 @@ import datetime as dt
 from .config import Config
 from .links import program_link, seats_aero_link
 from .rank import Rejection, RoundTrip
+from .routing import Route
 from .transfers import Conversion
 
 MARKER = "<!-- awardwatch:report -->"
@@ -32,6 +33,32 @@ def transfer_table(conversions: list[Conversion]) -> str:
             f"{'yes' if c.partner.verified else '**no**'} |"
         )
     return "\n".join(lines)
+
+
+def routing_table(routes: list[Route], pooling: dict[str, set[str]]) -> str:
+    if not routes:
+        return "_No route found._"
+    lines = [
+        "| Route | Miles | Miles per point | Hops | Confirmed |",
+        "|---|---:|---:|:--:|:--:|",
+    ]
+    for r in routes:
+        arrow = r.describe().replace("amex_mr -> ", "")
+        lines.append(
+            f"| {arrow} | **{r.miles:,}** | {r.rate:.3f} | {r.hops} | "
+            f"{'yes' if r.verified else '**inferred**'} |"
+        )
+    out = "\n".join(lines)
+
+    extras = [f"{k} also unlocks {', '.join(sorted(v))}" for k, v in pooling.items() if v]
+    if extras:
+        out += (
+            "\n\n> **Pooling.** " + "; ".join(extras) + ". These move 1:1 and create "
+            "no extra miles, but a single transfer buys access to every one of "
+            "their award charts -- which is why a 2:1 Avios transfer is worth "
+            "more than its rate alone suggests."
+        )
+    return out
 
 
 def shared_currency_note(conversions: list[Conversion]) -> str:
@@ -131,6 +158,8 @@ def render(
     new_keys: set[str],
     notes: list[str],
     rejections: list[Rejection] | None = None,
+    routes: list[Route] | None = None,
+    pooling: dict[str, set[str]] | None = None,
 ) -> str:
     now = dt.datetime.now(dt.timezone.utc)
     programs = [c.partner.key for c in conversions]
@@ -189,7 +218,11 @@ def render(
         ]
 
     parts += [
-        "## (a) What 115k MR converts into",
+        "## (a) Best route from points to miles",
+        "",
+        routing_table(routes or [], pooling or {}),
+        "",
+        "### Every partner, direct",
         "",
         transfer_table(conversions),
         shared_currency_note(conversions),

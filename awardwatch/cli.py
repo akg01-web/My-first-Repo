@@ -7,7 +7,7 @@ import sys
 from pathlib import Path
 
 from . import config as config_mod
-from . import baseline, estimate, notify, observations, providers, report, transfers
+from . import baseline, estimate, notify, observations, providers, report, routing, transfers
 from .rank import build_round_trips
 from .state import State
 
@@ -119,7 +119,27 @@ def run(config_path: str, dry_run: bool, out_path: str | None, optimize: str = "
     if ceiling:
         trips = [t for t in trips if t.miles <= int(ceiling)]
 
-    body = report.render(cfg, conversions, trips, new_keys, notes, rejections)
+    graph_path = cfg.partners_path.parent / "transfer_graph.yaml"
+    routes: list[routing.Route] = []
+    pooling: dict[str, set[str]] = {}
+    if graph_path.exists():
+        currencies, edges = routing.load_graph(graph_path)
+        routes = routing.best_routes(edges, currencies, cfg.mr_balance, bonuses=cfg.bonus_pct)
+        pooling = {
+            r.target: routing.pooling_group(edges, r.target)
+            for r in routes
+            if routing.pooling_group(edges, r.target)
+        }
+        if routes:
+            top = routes[0]
+            notes.append(
+                f"Best conversion route: {top.describe()} = {top.miles:,} miles "
+                f"({top.rate:.3f} per point)."
+            )
+
+    body = report.render(
+        cfg, conversions, trips, new_keys, notes, rejections, routes, pooling
+    )
 
     if out_path:
         target = Path(out_path)

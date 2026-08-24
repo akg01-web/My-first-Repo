@@ -39,7 +39,8 @@ jobs:
           for host in seats.aero developers.seats.aero docs.seats.aero \
                       www.virginatlantic.com www.qatarairways.com \
                       www.britishairways.com www.etihad.com; do
-            code=$(curl -sS -o /dev/null -w '%{http_code}' --max-time 20 "https://$host/" 2>/dev/null || echo "000")
+            code=$(curl -sS -o /dev/null -w '%{http_code}' --max-time 20 "https://$host/" 2>/dev/null || true)
+            code=${code:-000}
             case "$code" in
               000) verdict="UNREACHABLE" ;;
               2*|3*) verdict="reachable" ;;

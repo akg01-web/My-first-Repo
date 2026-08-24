@@ -86,6 +86,29 @@ dramatically lower, Virgin is where these points should go.
 splits one pot; it does not create two. The report prints this warning every run
 because it is an easy and expensive mistake.
 
+### Best ratio is not best deal
+
+Virgin has the best transfer ratio on the roster and the worst cash cost, and
+those pull in opposite directions. Verified August 2026:
+
+| Programme | Miles | Carrier surcharge | True premium cabin? |
+|---|---:|---|---|
+| Virgin Atlantic | **92,000** | **~$240/one-way, ~$480 return** | Yes |
+| Qatar Privilege Club | 57,500 | **None** — taxes only | No |
+| Etihad Guest | 57,500 | Moderate | Yes |
+| BA Executive Club | 57,500 | High | Yes |
+| Asia Miles | 57,500 | Moderate | Yes |
+| KrisFlyer | 57,500 | Varies by carrier | Yes |
+
+Virgin has raised award fees twice since 2025. Qatar levies no carrier-imposed
+surcharge at all, but has no true premium economy cabin, so it is a
+business-class play or nothing. Rank by cash rather than miles with
+`--optimize cash`.
+
+**There is no zero-cash award ticket.** Every option carries government taxes at
+minimum; the Virgin premium booking runs about $480. See
+[BOOKING.md](BOOKING.md) for the full runbook.
+
 ### What 92,000 miles actually reaches
 
 Rough round-trip cost, BOM–ORD, per person:

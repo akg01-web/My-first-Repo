@@ -12,7 +12,7 @@ from .rank import build_round_trips
 from .state import State
 
 
-def run(config_path: str, dry_run: bool, out_path: str | None) -> int:
+def run(config_path: str, dry_run: bool, out_path: str | None, optimize: str = "miles") -> int:
     cfg = config_mod.load(config_path)
     notes: list[str] = []
 
@@ -27,6 +27,17 @@ def run(config_path: str, dry_run: bool, out_path: str | None) -> int:
         notes.append(
             f"{len(unverified)} transfer ratio(s) still unverified: {', '.join(unverified)}."
         )
+
+    # A programme that has no such cabin on this route cannot be searched for
+    # it -- say so once rather than reporting "no availability" every run.
+    impossible = [
+        (p.key, cabin)
+        for p in partners
+        for cabin in cfg.trip.cabins
+        if p.cabins_available and cabin not in p.cabins_available
+    ]
+    for program, cabin in impossible:
+        notes.append(f"{program} has no {cabin} cabin on this route; not searched.")
 
     options = []
     active = providers.build(cfg.providers)
@@ -43,7 +54,18 @@ def run(config_path: str, dry_run: bool, out_path: str | None) -> int:
         baselines = estimate.load_baselines(cfg.baselines_path)
         options = estimate.estimated_options(cfg.trip, baselines, list(by_key))
 
-    trips, rejections = build_round_trips(options, by_key, cfg.trip.constraints)
+    options = [
+        o for o in options
+        if not (
+            by_key.get(o.program)
+            and by_key[o.program].partner.cabins_available
+            and o.cabin not in by_key[o.program].partner.cabins_available
+        )
+    ]
+
+    trips, rejections = build_round_trips(
+        options, by_key, cfg.trip.constraints, optimize
+    )
 
     state = State(cfg.state_path)
     new_keys: set[str] = set()
@@ -96,8 +118,14 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--config", default="config.yaml")
     parser.add_argument("--dry-run", action="store_true", help="print, do not publish or save state")
     parser.add_argument("--out", default=None, help="also write the report to this path")
+    parser.add_argument(
+        "--optimize",
+        choices=("miles", "cash"),
+        default="miles",
+        help="rank by mileage cost (default) or by out-of-pocket cash",
+    )
     args = parser.parse_args(argv)
-    return run(args.config, args.dry_run, args.out)
+    return run(args.config, args.dry_run, args.out, args.optimize)
 
 
 if __name__ == "__main__":

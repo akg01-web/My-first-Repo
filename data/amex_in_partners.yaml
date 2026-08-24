@@ -21,14 +21,23 @@ partners:
     verified: true
     last_checked: "2026-08-24"
     award_search_url: "https://www.virginatlantic.com/us/en/flight-search"
+    cabins_available: [business, premium]
+    # Verified Aug 2026: carrier-imposed fees, per person per one-way.
+    surcharge_usd: {premium: 240, business: 586}
+    surcharge_level: severe
     notes: >-
       The single most valuable partner here by a wide margin: 0.80 miles per
       point against 0.50 everywhere else, which is 60% more miles from the same
       balance. Virgin flies LHR-BOM on its own metal and redemptions are also
-      possible on Delta and Air France-KLM. Routing BOM-LHR-ORD on one ticket
-      should avoid UK APD as a sub-24h transit connection, but confirm that on
-      the specific itinerary -- getting it wrong is expensive. Virgin's own
-      carrier-imposed surcharges are steep.
+      possible on Delta and Air France-KLM. Virgin flies both LHR-BOM and
+      LHR-ORD on its own metal, so BOM-LHR-ORD is a complete Virgin routing with
+      a genuine Premium cabin -- the strongest premium-economy candidate on this
+      list. The catch is cash: Virgin has raised award surcharges twice since
+      2025, and premium now runs about USD 240 per person per one-way, roughly
+      USD 480 return. That is the highest on this roster by a wide margin, and
+      the CEO has signalled further changes. Routing BOM-LHR-ORD on one ticket
+      should avoid UK APD as a sub-24h transit connection, but confirm it on the
+      specific itinerary -- getting it wrong is expensive.
 
   - key: qatar_avios
     name: Qatar Airways Privilege Club
@@ -40,13 +49,23 @@ partners:
     verified: true
     last_checked: "2026-08-24"
     award_search_url: "https://www.qatarairways.com/en/Privilege-Club.html"
+    # Qatar's "Comfort+" is an upgraded economy seat on selected aircraft, not a
+    # true premium cabin, and is not reliably bookable as an award class.
+    cabins_available: [business]
+    surcharge_usd: {business: 170}
+    surcharge_level: none
     notes: >-
       Qatar flies BOM-DOH-ORD on its own metal, which is the cleanest routing on
       this whole list: one connection, one airline, Qsuite in business. Privilege
       Club uses Avios, the same currency as BA Executive Club, and the two
       programmes can move Avios between each other. Qatar usually prices its own
       metal better than BA does, so transfer here rather than to BA for Qatar
-      flights.
+      flights. Critically for a cash-minimising booking, Qatar levies NO
+      carrier-imposed surcharges on Avios redemptions -- you pay government taxes
+      plus a distance-based redemption fee, typically well under USD 200 return.
+      That is the lowest cash outlay available here. The limitation is cabin:
+      Qatar has no true premium economy, so this programme is a business-class
+      play or nothing.
 
   - key: ba_avios
     name: British Airways Executive Club
@@ -58,6 +77,8 @@ partners:
     verified: true
     last_checked: "2026-08-24"
     award_search_url: "https://www.britishairways.com/travel/redeem/execclub/"
+    cabins_available: [business, premium]
+    surcharge_level: high
     notes: >-
       Shares the Avios currency with Qatar Privilege Club, so this and
       qatar_avios draw on one pot rather than two -- do not add their balances
@@ -76,6 +97,8 @@ partners:
     verified: true
     last_checked: "2026-08-24"
     award_search_url: "https://www.etihad.com/en-in/"
+    cabins_available: [business, premium]
+    surcharge_level: moderate
     notes: >-
       BOM-AUH-ORD on Etihad metal. Etihad Guest has moved to dynamic pricing, so
       the old fixed-chart sweet spots are largely gone, but off-peak dates still
@@ -92,6 +115,8 @@ partners:
     verified: true
     last_checked: "2026-08-24"
     award_search_url: "https://www.cathaypacific.com/cx/en_IN/book-a-trip/redeem-flights.html"
+    cabins_available: [business, premium]
+    surcharge_level: moderate
     notes: >-
       BOM-HKG-ORD on Cathay metal. Geographically this is the long way round --
       eastbound across Asia and the Pacific to reach Chicago -- and Asia Miles
@@ -109,6 +134,8 @@ partners:
     verified: true
     last_checked: "2026-08-24"
     award_search_url: "https://www.singaporeair.com/redeemFlight"
+    cabins_available: [business, premium]
+    surcharge_level: varies
     notes: >-
       Singapore does not serve ORD, so every redemption here is a Star Alliance
       partner award and prices off the partner chart rather than SQ's cheaper

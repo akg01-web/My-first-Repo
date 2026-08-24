@@ -1,7 +1,7 @@
 <!-- awardwatch:report -->
 # Award watch: BOM to ORD, May 2027
 
-_Updated 2026-08-24 17:40 UTC_
+_Updated 2026-08-24 17:47 UTC_
 
 - Balance: **115,000 Amex India MR** (platinum_charge)
 - Outbound BOM-ORD: 2027-04-15..2027-05-05
@@ -26,9 +26,9 @@ Cheapest legal round trip is **88,000 miles** (etihad, premium): leave BOM 04 Ma
 | | Programme | Cabin | Leave BOM | Land ORD | Leave US | Days in US | Round-trip miles | Taxes | vs balance |
 |:--:|---|---|---|---|---|---:|---:|---:|---|
 | short | etihad | premium | 04 May | 05 May | 21 May | 15 | 88,000 | $160 | short 30,500 |
-| OK | virgin | premium | 03 May | 04 May | 20 May | 15 | 90,000 | $325 | **covered** |
-| short | virgin | business | 24 Apr | 25 Apr | 11 May | 15 | 155,000 | $420 | short 63,000 |
-| short | qatar_avios | business | 05 May | 06 May | 22 May | 15 | 200,000 | $210 | short 142,500 |
+| OK | virgin | premium | 03 May | 04 May | 20 May | 15 | 90,000 | $480 | **covered** |
+| short | virgin | business | 24 Apr | 25 Apr | 11 May | 15 | 155,000 | $1,172 | short 63,000 |
+| short | qatar_avios | business | 05 May | 06 May | 22 May | 15 | 200,000 | $170 | short 142,500 |
 
 
 ### Ruled out by the trip constraints
@@ -77,4 +77,5 @@ Free manual checks (no API key needed):
 
 ## Run notes
 
+- qatar_avios has no premium cabin on this route; not searched.
 - 1 programme/cabin combination(s) had availability but no pairing that satisfies the trip constraints.

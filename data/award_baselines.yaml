@@ -16,12 +16,14 @@
 # taxes_usd is per person, one way, and is the part people forget.
 
 baselines:
+  # Surcharges below are VERIFIED (Aug 2026); the mileage figures are not.
   virgin:
-    business: {miles: 95000, taxes_usd: 320}
+    business: {miles: 95000, taxes_usd: 586}
     premium:  {miles: 55000, taxes_usd: 240}
   qatar_avios:
-    business: {miles: 105000, taxes_usd: 140}
-    premium:  {miles: 65000, taxes_usd: 110}
+    # No carrier-imposed surcharge: government taxes plus a distance-based
+    # redemption fee. No true premium cabin, so no premium row.
+    business: {miles: 105000, taxes_usd: 85}
   ba_avios:
     business: {miles: 125000, taxes_usd: 180}
     premium:  {miles: 75000, taxes_usd: 150}

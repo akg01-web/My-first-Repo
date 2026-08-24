@@ -75,6 +75,7 @@ def build_round_trips(
     options: list[AwardOption],
     conversions: dict[str, Conversion],
     constraints: Constraints | None = None,
+    optimize: str = "miles",
 ) -> tuple[list[RoundTrip], list[Rejection]]:
     """Cheapest *legal* outbound/return pairing per programme and cabin.
 
@@ -115,7 +116,7 @@ def build_round_trips(
                     reasons.append(why)
                     continue
                 candidate = RoundTrip(program, cabin, out, back, conv, constraints)
-                if best is None or candidate.miles < best.miles:
+                if best is None or _cost(candidate, optimize) < _cost(best, optimize):
                     best = candidate
 
         if best is not None:
@@ -127,5 +128,13 @@ def build_round_trips(
 
     # Real availability first, then cheapest, so estimates never outrank a
     # bookable seat at the same price.
-    trips.sort(key=lambda t: (t.estimated, t.miles))
+    trips.sort(key=lambda t: (t.estimated, _cost(t, optimize)))
     return trips, rejections
+
+
+def _cost(trip: RoundTrip, optimize: str) -> tuple[float, float]:
+    """Sort key. The secondary axis breaks ties on the primary one."""
+    cash = trip.taxes_usd if trip.taxes_usd is not None else float("inf")
+    if optimize == "cash":
+        return (cash, trip.miles)
+    return (trip.miles, cash)

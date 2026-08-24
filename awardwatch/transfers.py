@@ -19,6 +19,8 @@ class Partner:
     alliance: str
     currency: str
     ratios: dict[str, tuple[int, int]]
+    cabins_available: tuple[str, ...]
+    surcharge_level: str
     min_transfer_mr: int
     increment_mr: int
     verified: bool
@@ -74,6 +76,8 @@ def load_partners(path: str | Path) -> list[Partner]:
                 name=str(row["name"]),
                 alliance=str(row.get("alliance", "none")),
                 currency=str(row.get("currency", row["key"])),
+                cabins_available=tuple(row.get("cabins_available") or ()),
+                surcharge_level=str(row.get("surcharge_level", "unknown")),
                 ratios=ratios,
                 min_transfer_mr=int(row.get("min_transfer_mr", 1000)),
                 increment_mr=int(row.get("increment_mr", 1000)),

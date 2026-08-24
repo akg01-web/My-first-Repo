@@ -7,11 +7,13 @@ name: probe-datasource
 # a strict network egress allowlist and cannot reach seats.aero, any airline, or
 # any award aggregator. GitHub's runners have no such restriction, so this is
 # the only honest way to validate the client: run it here and read the output.
+#
+# Everything is written to stdout as well as the step summary. The summary is
+# only readable by a human in a browser; the job log is readable through the
+# API, which is what an unattended check-in has to work from.
 
 on:
   workflow_dispatch:
-  # Also runs on any push that touches the probe itself, so a change to it is
-  # validated immediately rather than lying broken until someone runs it.
   push:
     paths:
       - ".github/workflows/probe-datasource.yml"
@@ -28,34 +30,43 @@ jobs:
 
       - name: Reachability
         run: |
-          {
-            echo "### Reachability from a GitHub runner"
-            echo ""
-            echo "| Host | HTTP |"
-            echo "|---|---|"
-          } >> "$GITHUB_STEP_SUMMARY"
-          for host in seats.aero developers.seats.aero www.virginatlantic.com \
-                      www.qatarairways.com www.britishairways.com; do
-            code=$(curl -sS -o /dev/null -w '%{http_code}' --max-time 20 "https://$host/" || echo "unreachable")
-            echo "| $host | $code |" >> "$GITHUB_STEP_SUMMARY"
+          say() { printf '%s\n' "$*" | tee -a "$GITHUB_STEP_SUMMARY"; }
+
+          say "### Reachability from a GitHub runner"
+          say ""
+          say "| Host | HTTP | Verdict |"
+          say "|---|---|---|"
+          for host in seats.aero developers.seats.aero docs.seats.aero \
+                      www.virginatlantic.com www.qatarairways.com \
+                      www.britishairways.com www.etihad.com; do
+            code=$(curl -sS -o /dev/null -w '%{http_code}' --max-time 20 "https://$host/" 2>/dev/null || true)
+            code=${code:-000}
+            case "$code" in
+              000) verdict="UNREACHABLE" ;;
+              2*|3*) verdict="reachable" ;;
+              4*|5*) verdict="responded ($code)" ;;
+              *) verdict="?" ;;
+            esac
+            say "| $host | $code | $verdict |"
           done
 
       - name: Partner API contract
         env:
           SEATS_AERO_API_KEY: ${{ secrets.SEATS_AERO_API_KEY }}
         run: |
-          {
-            echo ""
-            echo "### Partner API contract"
-            echo ""
-          } >> "$GITHUB_STEP_SUMMARY"
+          say() { printf '%s\n' "$*" | tee -a "$GITHUB_STEP_SUMMARY"; }
 
+          say ""
+          say "### Partner API contract"
+          say ""
+
+          # Guarded in the shell, not in `if:` -- the secrets context is not
+          # available to step-level conditions, and referencing it there
+          # invalidates the entire workflow file.
           if [ -z "$SEATS_AERO_API_KEY" ]; then
-            {
-              echo "No \`SEATS_AERO_API_KEY\` secret is set, so the authenticated"
-              echo "endpoint was not called. The table above still shows whether a"
-              echo "key would be usable from here."
-            } >> "$GITHUB_STEP_SUMMARY"
+            say "No \`SEATS_AERO_API_KEY\` secret set, so the authenticated endpoint"
+            say "was not called. The reachability table above still answers whether"
+            say "a key would be usable from here."
             exit 0
           fi
 
@@ -64,31 +75,27 @@ jobs:
                  -H "Partner-Authorization: $SEATS_AERO_API_KEY" \
                  -H "Accept: application/json" "$url" || echo "000")
 
-          {
-            echo "HTTP status: \`$code\`"
-            echo ""
-            echo '```'
-            python3 scripts/probe_contract.py /tmp/probe.json || true
-            echo '```'
-          } >> "$GITHUB_STEP_SUMMARY"
+          say "HTTP status: \`$code\`"
+          say ""
+          say '```'
+          python3 scripts/probe_contract.py /tmp/probe.json 2>&1 | tee -a "$GITHUB_STEP_SUMMARY" || true
+          say '```'
 
       - name: End-to-end run against live data
         env:
           SEATS_AERO_API_KEY: ${{ secrets.SEATS_AERO_API_KEY }}
         run: |
-          # Guarded in the shell rather than in `if:` -- the secrets context is
-          # not available to step-level conditions, and referencing it there
-          # invalidates the whole workflow file.
+          say() { printf '%s\n' "$*" | tee -a "$GITHUB_STEP_SUMMARY"; }
+
           if [ -z "$SEATS_AERO_API_KEY" ]; then
-            echo "No key set; skipping the live run." >> "$GITHUB_STEP_SUMMARY"
+            say "No key set; the live pipeline run was skipped."
             exit 0
           fi
+
           pip install -r requirements.txt
-          {
-            echo ""
-            echo "### Full pipeline against live availability"
-            echo ""
-            echo '```'
-            python -m awardwatch --dry-run --optimize cash 2>&1 | head -60
-            echo '```'
-          } >> "$GITHUB_STEP_SUMMARY"
+          say ""
+          say "### Full pipeline against live availability"
+          say ""
+          say '```'
+          python -m awardwatch --dry-run --optimize cash 2>&1 | head -60 | tee -a "$GITHUB_STEP_SUMMARY"
+          say '```'

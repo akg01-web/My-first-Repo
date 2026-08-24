@@ -18,8 +18,8 @@ def _fmt_taxes(value: float | None) -> str:
 
 def transfer_table(conversions: list[Conversion]) -> str:
     lines = [
-        "| Programme | Ratio | Miles from balance | Rate | Stranded MR | Verified |",
-        "|---|---|---:|---:|---:|:--:|",
+        "| Programme | Currency | Ratio | Miles from balance | Rate | Verified |",
+        "|---|---|---|---:|---:|:--:|",
     ]
     for c in conversions:
         mr_per, miles_per = c.partner.ratio(c.tier)
@@ -27,11 +27,33 @@ def transfer_table(conversions: list[Conversion]) -> str:
         if c.bonus_pct:
             ratio += f" +{c.bonus_pct:.0f}%"
         lines.append(
-            f"| {c.partner.name} | {ratio} | **{c.miles:,}** | "
-            f"{c.effective_rate:.2f} | {c.mr_stranded:,} | "
+            f"| {c.partner.name} | {c.partner.currency} | {ratio} | "
+            f"**{c.miles:,}** | {c.effective_rate:.2f} | "
             f"{'yes' if c.partner.verified else '**no**'} |"
         )
     return "\n".join(lines)
+
+
+def shared_currency_note(conversions: list[Conversion]) -> str:
+    """Warn where two programmes draw on one pot rather than two."""
+    groups: dict[str, list[str]] = {}
+    for c in conversions:
+        groups.setdefault(c.partner.currency, []).append(c.partner.name)
+
+    shared = {cur: names for cur, names in groups.items() if len(names) > 1}
+    if not shared:
+        return ""
+
+    lines = [""]
+    for currency, names in shared.items():
+        joined = " and ".join(names)
+        lines.append(
+            f"> **{joined} share the same {currency} balance.** The rows above are "
+            f"what the whole balance becomes in *either* programme, not in each -- "
+            f"do not add them together. Transferring splits one pot, it does not "
+            f"create two."
+        )
+    return "\n".join(lines) + "\n"
 
 
 def trip_table(trips: list[RoundTrip], limit: int) -> str:
@@ -170,9 +192,10 @@ def render(
         "## (a) What 115k MR converts into",
         "",
         transfer_table(conversions),
+        shared_currency_note(conversions),
         "",
-        "> Ratios marked **no** under Verified have not been confirmed against "
-        "americanexpress.com/in. Confirm before transferring -- transfers are irreversible.",
+        "> Transfers are irreversible. Never move points into a programme until the "
+        "specific award seat is held.",
         "",
         "## Check these yourself",
         "",

@@ -1,13 +1,13 @@
 <!-- awardwatch:report -->
 # Award watch: BOM to ORD, May 2027
 
-_Updated 2026-08-24 17:04 UTC_
+_Updated 2026-08-24 17:40 UTC_
 
 - Balance: **115,000 Amex India MR** (platinum_charge)
 - Outbound BOM-ORD: 2027-04-15..2027-05-05
 - Return ORD-BOM: 2027-05-11..2027-06-05
 - Cabins: business, premium
-- Best convertible balance: **115,000 miles**
+- Best convertible balance: **92,000 miles**
 
 **Trip constraints**
 
@@ -17,7 +17,7 @@ _Updated 2026-08-24 17:04 UTC_
 
 ## Status
 
-Cheapest legal round trip is **88,000 miles** (etihad, premium): leave BOM 04 May, land 05 May, leave the US 21 May, 15 full days. 2 of 4 options are covered by the balance.
+Cheapest legal round trip is **88,000 miles** (etihad, premium): leave BOM 04 May, land 05 May, leave the US 21 May, 15 full days. 1 of 4 options are covered by the balance.
 
 **4 new option(s) since the last run.**
 
@@ -25,30 +25,33 @@ Cheapest legal round trip is **88,000 miles** (etihad, premium): leave BOM 04 Ma
 
 | | Programme | Cabin | Leave BOM | Land ORD | Leave US | Days in US | Round-trip miles | Taxes | vs balance |
 |:--:|---|---|---|---|---|---:|---:|---:|---|
-| OK | etihad | premium | 04 May | 05 May | 21 May | 15 | 88,000 | $160 | **covered** |
-| OK | flyingblue | premium | 03 May | 04 May | 20 May | 15 | 102,000 | $275 | **covered** |
-| short | flyingblue | business | 24 Apr | 25 Apr | 11 May | 15 | 155,000 | $335 | short 40,000 |
-| short | etihad | business | 05 May | 06 May | 22 May | 15 | 175,000 | $185 | short 60,000 |
+| short | etihad | premium | 04 May | 05 May | 21 May | 15 | 88,000 | $160 | short 30,500 |
+| OK | virgin | premium | 03 May | 04 May | 20 May | 15 | 90,000 | $325 | **covered** |
+| short | virgin | business | 24 Apr | 25 Apr | 11 May | 15 | 155,000 | $420 | short 63,000 |
+| short | qatar_avios | business | 05 May | 06 May | 22 May | 15 | 200,000 | $210 | short 142,500 |
 
 
 ### Ruled out by the trip constraints
 
 | Programme | Cabin | Why |
 |---|---|---|
-| krisflyer | business | no return availability |
+| asiamiles | business | no return availability |
 
 ## (a) What 115k MR converts into
 
-| Programme | Ratio | Miles from balance | Rate | Stranded MR | Verified |
-|---|---|---:|---:|---:|:--:|
-| Singapore Airlines KrisFlyer | 1,000:1,000 | **115,000** | 1.00 | 0 | **no** |
-| Emirates Skywards | 1,000:1,000 | **115,000** | 1.00 | 0 | **no** |
-| Etihad Guest | 1,000:1,000 | **115,000** | 1.00 | 0 | **no** |
-| British Airways Executive Club (Avios) | 1,000:1,000 | **115,000** | 1.00 | 0 | **no** |
-| Air France-KLM Flying Blue | 1,000:1,000 | **115,000** | 1.00 | 0 | **no** |
-| Air India Maharaja Club | 1,000:1,000 | **115,000** | 1.00 | 0 | **no** |
+| Programme | Currency | Ratio | Miles from balance | Rate | Verified |
+|---|---|---|---:|---:|:--:|
+| Virgin Atlantic Flying Club | virgin | 1,000:800 | **92,000** | 0.80 | yes |
+| Qatar Airways Privilege Club | avios | 1,000:500 | **57,500** | 0.50 | yes |
+| British Airways Executive Club | avios | 1,000:500 | **57,500** | 0.50 | yes |
+| Etihad Guest | etihad | 1,000:500 | **57,500** | 0.50 | yes |
+| Cathay Pacific Asia Miles | asiamiles | 1,000:500 | **57,500** | 0.50 | yes |
+| Singapore Airlines KrisFlyer | krisflyer | 1,000:500 | **57,500** | 0.50 | yes |
 
-> Ratios marked **no** under Verified have not been confirmed against americanexpress.com/in. Confirm before transferring -- transfers are irreversible.
+> **Qatar Airways Privilege Club and British Airways Executive Club share the same avios balance.** The rows above are what the whole balance becomes in *either* programme, not in each -- do not add them together. Transferring splits one pot, it does not create two.
+
+
+> Transfers are irreversible. Never move points into a programme until the specific award seat is held.
 
 ## Check these yourself
 
@@ -57,24 +60,21 @@ Free manual checks (no API key needed):
 **BOM to ORD** (2027-04-15..2027-05-05)
 - seats.aero, business: <https://seats.aero/search?origin=BOM&destination=ORD&startDate=2027-04-15&endDate=2027-05-05&cabin=business>
 - seats.aero, premium: <https://seats.aero/search?origin=BOM&destination=ORD&startDate=2027-04-15&endDate=2027-05-05&cabin=premium>
-- krisflyer: <https://www.singaporeair.com/redeemFlight>
-- emirates: <https://www.emirates.com/in/english/>
-- etihad: <https://www.etihad.com/en-in/book/>
+- virgin: <https://www.virginatlantic.com/flight-search/search?origin=BOM&destination=ORD&departureDate=2027-04-15&adults=1&awardTravel=true>
+- qatar_avios: <https://booking.qatarairways.com/nsp/views/showBooking.action?widget=QR&searchType=F&bookingClass=B&tripType=O&fromStation=BOM&toStation=ORD&departingDate=2027-04-15&allowRedemption=Y>
 - ba_avios: <https://www.britishairways.com/travel/redeem/execclub/_gf/en_gb?eId=111011&departurePoint=BOM&destinationPoint=ORD&departInputDate=15/04/2027&oneWay=on&CabinCode=C>
-- flyingblue: <https://www.airfrance.in/search/offers?connections=BOM:ORD&pax=1:0:0:0:0:0:0:0&activeConnection=0&bookingFlow=REWARD&departureDate=2027-04-15>
-- maharaja: <https://www.airindia.com/in/en/booking/redeem-points.html>
+- etihad: <https://www.etihad.com/en-in/book/>
+- asiamiles: <https://www.cathaypacific.com/cx/en_IN/book-a-trip/redeem-flights.html>
 
 **ORD to BOM** (2027-05-11..2027-06-05)
 - seats.aero, business: <https://seats.aero/search?origin=ORD&destination=BOM&startDate=2027-05-11&endDate=2027-06-05&cabin=business>
 - seats.aero, premium: <https://seats.aero/search?origin=ORD&destination=BOM&startDate=2027-05-11&endDate=2027-06-05&cabin=premium>
-- krisflyer: <https://www.singaporeair.com/redeemFlight>
-- emirates: <https://www.emirates.com/in/english/>
-- etihad: <https://www.etihad.com/en-in/book/>
+- virgin: <https://www.virginatlantic.com/flight-search/search?origin=ORD&destination=BOM&departureDate=2027-05-11&adults=1&awardTravel=true>
+- qatar_avios: <https://booking.qatarairways.com/nsp/views/showBooking.action?widget=QR&searchType=F&bookingClass=B&tripType=O&fromStation=ORD&toStation=BOM&departingDate=2027-05-11&allowRedemption=Y>
 - ba_avios: <https://www.britishairways.com/travel/redeem/execclub/_gf/en_gb?eId=111011&departurePoint=ORD&destinationPoint=BOM&departInputDate=11/05/2027&oneWay=on&CabinCode=C>
-- flyingblue: <https://www.airfrance.in/search/offers?connections=ORD:BOM&pax=1:0:0:0:0:0:0:0&activeConnection=0&bookingFlow=REWARD&departureDate=2027-05-11>
-- maharaja: <https://www.airindia.com/in/en/booking/redeem-points.html>
+- etihad: <https://www.etihad.com/en-in/book/>
+- asiamiles: <https://www.cathaypacific.com/cx/en_IN/book-a-trip/redeem-flights.html>
 
 ## Run notes
 
-- 6 transfer ratio(s) still unverified: krisflyer, emirates, etihad, ba_avios, flyingblue, maharaja.
 - 1 programme/cabin combination(s) had availability but no pairing that satisfies the trip constraints.

@@ -1,29 +1,36 @@
 # ESTIMATED one-way award cost, BOM -> ORD, per programme, per cabin.
 #
-# These are planning baselines ONLY. They are not live prices and several of
-# these programmes are fully dynamic, meaning the real number can swing by 2x
-# on the same route between two dates. They exist so the tool can tell you
-# roughly how far 115k MR gets you before you have any live data source wired
-# up. Live provider results always override these.
+# !! LOW CONFIDENCE. READ THIS. !!
+# Unlike the transfer ratios in amex_in_partners.yaml -- which are confirmed --
+# nothing below has been verified against a live award search. They are rough
+# planning figures so the tool can say "roughly how far does this balance go"
+# before any live data source is wired up, and they are the weakest numbers in
+# this repository.
+#
+# Three of these programmes (Virgin, Qatar Privilege Club, Etihad) price
+# dynamically, which means there is no chart to be right about: the same seat
+# can differ by 2x between two dates. Any live provider result overrides these
+# immediately, and estimated rows are tagged `(est)` in the report so they are
+# never mistaken for something bookable.
 #
 # taxes_usd is per person, one way, and is the part people forget.
 
 baselines:
-  krisflyer:
-    business: {miles: 95000, taxes_usd: 90}
-    premium:  {miles: 62000, taxes_usd: 80}
-  emirates:
-    business: {miles: 105000, taxes_usd: 300}
-    premium:  {miles: 72500, taxes_usd: 220}
+  virgin:
+    business: {miles: 95000, taxes_usd: 320}
+    premium:  {miles: 55000, taxes_usd: 240}
+  qatar_avios:
+    business: {miles: 105000, taxes_usd: 140}
+    premium:  {miles: 65000, taxes_usd: 110}
+  ba_avios:
+    business: {miles: 125000, taxes_usd: 180}
+    premium:  {miles: 75000, taxes_usd: 150}
   etihad:
     business: {miles: 88000, taxes_usd: 130}
     premium:  {miles: 55000, taxes_usd: 110}
-  ba_avios:
-    business: {miles: 100000, taxes_usd: 180}
-    premium:  {miles: 62500, taxes_usd: 150}
-  flyingblue:
-    business: {miles: 88000, taxes_usd: 250}
-    premium:  {miles: 55000, taxes_usd: 200}
-  maharaja:
-    business: {miles: 90000, taxes_usd: 120}
-    premium:  {miles: 60000, taxes_usd: 100}
+  asiamiles:
+    business: {miles: 130000, taxes_usd: 120}
+    premium:  {miles: 85000, taxes_usd: 100}
+  krisflyer:
+    business: {miles: 110000, taxes_usd: 100}
+    premium:  {miles: 70000, taxes_usd: 90}

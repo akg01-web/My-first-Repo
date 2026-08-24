@@ -13,20 +13,22 @@ from .config import Trip
 
 # %(o)s origin, %(d)s destination, %(iso)s YYYY-MM-DD, %(dmy)s DD/MM/YYYY
 TEMPLATES: dict[str, str] = {
-    "flyingblue": (
-        "https://www.airfrance.in/search/offers?connections=%(o)s:%(d)s"
-        "&pax=1:0:0:0:0:0:0:0&activeConnection=0&bookingFlow=REWARD"
-        "&departureDate=%(iso)s"
+    "virgin": (
+        "https://www.virginatlantic.com/flight-search/search?origin=%(o)s"
+        "&destination=%(d)s&departureDate=%(iso)s&adults=1&awardTravel=true"
+    ),
+    "qatar_avios": (
+        "https://booking.qatarairways.com/nsp/views/showBooking.action"
+        "?widget=QR&searchType=F&bookingClass=B&tripType=O"
+        "&fromStation=%(o)s&toStation=%(d)s&departingDate=%(iso)s&allowRedemption=Y"
     ),
     "ba_avios": (
         "https://www.britishairways.com/travel/redeem/execclub/_gf/en_gb"
         "?eId=111011&departurePoint=%(o)s&destinationPoint=%(d)s"
         "&departInputDate=%(dmy)s&oneWay=on&CabinCode=C"
     ),
-    "emirates": "https://www.emirates.com/in/english/",
     "etihad": "https://www.etihad.com/en-in/book/",
-    "krisflyer": "https://www.singaporeair.com/redeemFlight",
-    "maharaja": "https://www.airindia.com/in/en/booking/redeem-points.html",
+    "asiamiles": "https://www.cathaypacific.com/cx/en_IN/book-a-trip/redeem-flights.html",
 }
 
 # seats.aero's web search is usable on the free tier even though its API is not.

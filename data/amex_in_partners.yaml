@@ -1,97 +1,119 @@
 # Amex INDIA Membership Rewards airline transfer partners.
 #
-# !! READ THIS !!
-# Every ratio below is marked `verified: false`. Amex India changes its partner
-# roster and ratios without much notice, and ratios differ by card. Confirm on
-# americanexpress.com/in (Membership Rewards -> Transfer to airline partner)
-# before you move a single point. Transfers are IRREVERSIBLE.
+# Confirmed with the Amex card concierge on 2026-08-24 for a Platinum Charge
+# card. These five are the entire airline roster -- Singapore KrisFlyer,
+# Emirates Skywards, Flying Blue and Air India Maharaja Club are NOT partners,
+# whatever general guidance about Amex Membership Rewards elsewhere suggests.
 #
 # ratio: mr -> miles. `1000 -> 500` means 2 MR buys 1 mile.
-# Set `verified: true` and update `last_checked` once you have confirmed a row.
+# The concierge quoted for Platinum Charge; `standard` mirrors those figures
+# but was NOT separately confirmed, so treat it as unverified.
 
 partners:
-  - key: krisflyer
-    name: Singapore Airlines KrisFlyer
-    alliance: Star Alliance
-    ratio: {standard: [1000, 500], platinum_charge: [1000, 1000]}
+  - key: virgin
+    name: Virgin Atlantic Flying Club
+    alliance: SkyTeam (partner)
+    currency: virgin
+    # Quoted as 10:8. Comfortably the best ratio on the roster.
+    ratio: {standard: [1000, 800], platinum_charge: [1000, 800]}
     min_transfer_mr: 1000
     increment_mr: 1000
-    verified: false
-    last_checked: null
-    award_search_url: "https://www.singaporeair.com/en_UK/us/ppsclub-krisflyer/"
+    verified: true
+    last_checked: "2026-08-24"
+    award_search_url: "https://www.virginatlantic.com/us/en/flight-search"
     notes: >-
-      SQ does not serve ORD. Any BOM-ORD redemption is a Star Alliance partner
-      award (e.g. via FRA/ZRH/EWR), which prices higher than SQ-metal saver and
-      has thinner partner space. Star J to the US midwest is hard in May.
+      The single most valuable partner here by a wide margin: 0.80 miles per
+      point against 0.50 everywhere else, which is 60% more miles from the same
+      balance. Virgin flies LHR-BOM on its own metal and redemptions are also
+      possible on Delta and Air France-KLM. Routing BOM-LHR-ORD on one ticket
+      should avoid UK APD as a sub-24h transit connection, but confirm that on
+      the specific itinerary -- getting it wrong is expensive. Virgin's own
+      carrier-imposed surcharges are steep.
 
-  - key: emirates
-    name: Emirates Skywards
-    alliance: none
-    ratio: {standard: [1000, 500], platinum_charge: [1000, 1000]}
+  - key: qatar_avios
+    name: Qatar Airways Privilege Club
+    alliance: oneworld
+    currency: avios
+    ratio: {standard: [1000, 500], platinum_charge: [1000, 500]}
     min_transfer_mr: 1000
     increment_mr: 1000
-    verified: false
-    last_checked: null
-    award_search_url: "https://www.emirates.com/in/english/"
+    verified: true
+    last_checked: "2026-08-24"
+    award_search_url: "https://www.qatarairways.com/en/Privilege-Club.html"
     notes: >-
-      BOM-DXB-ORD on Emirates metal, daily. Good availability, but Skywards
-      levies very heavy carrier-imposed surcharges on India-US business
-      (commonly USD 350-600 per person round trip). Check the cash cost before
-      you get excited about the mileage number.
+      Qatar flies BOM-DOH-ORD on its own metal, which is the cleanest routing on
+      this whole list: one connection, one airline, Qsuite in business. Privilege
+      Club uses Avios, the same currency as BA Executive Club, and the two
+      programmes can move Avios between each other. Qatar usually prices its own
+      metal better than BA does, so transfer here rather than to BA for Qatar
+      flights.
+
+  - key: ba_avios
+    name: British Airways Executive Club
+    alliance: oneworld
+    currency: avios
+    ratio: {standard: [1000, 500], platinum_charge: [1000, 500]}
+    min_transfer_mr: 1000
+    increment_mr: 1000
+    verified: true
+    last_checked: "2026-08-24"
+    award_search_url: "https://www.britishairways.com/travel/redeem/execclub/"
+    notes: >-
+      Shares the Avios currency with Qatar Privilege Club, so this and
+      qatar_avios draw on one pot rather than two -- do not add their balances
+      together when judging what you can afford. BA prices partner long-haul
+      business steeply on the distance chart, so DOH-ORD is usually cheaper
+      booked through Qatar. Avoid routings connecting at LHR: a business-class
+      departure there attracts UK APD of roughly GBP 200 per person.
 
   - key: etihad
     name: Etihad Guest
     alliance: none
-    ratio: {standard: [1000, 500], platinum_charge: [1000, 1000]}
+    currency: etihad
+    ratio: {standard: [1000, 500], platinum_charge: [1000, 500]}
     min_transfer_mr: 1000
     increment_mr: 1000
-    verified: false
-    last_checked: null
+    verified: true
+    last_checked: "2026-08-24"
     award_search_url: "https://www.etihad.com/en-in/"
     notes: >-
-      BOM-AUH-ORD on Etihad metal. Etihad Guest went dynamic; the old fixed
-      chart sweet spots are largely gone, but off-peak dates still surface
-      well-priced J. Surcharges lower than Emirates.
+      BOM-AUH-ORD on Etihad metal. Etihad Guest has moved to dynamic pricing, so
+      the old fixed-chart sweet spots are largely gone, but off-peak dates still
+      surface reasonable business fares. Surcharges are moderate by Gulf-carrier
+      standards.
 
-  - key: ba_avios
-    name: British Airways Executive Club (Avios)
+  - key: asiamiles
+    name: Cathay Pacific Asia Miles
     alliance: oneworld
-    ratio: {standard: [1000, 500], platinum_charge: [1000, 1000]}
+    currency: asiamiles
+    ratio: {standard: [1000, 500], platinum_charge: [1000, 500]}
     min_transfer_mr: 1000
     increment_mr: 1000
-    verified: false
-    last_checked: null
-    award_search_url: "https://www.britishairways.com/travel/redeem/execclub/"
+    verified: true
+    last_checked: "2026-08-24"
+    award_search_url: "https://www.cathaypacific.com/cx/en_IN/book-a-trip/redeem-flights.html"
     notes: >-
-      Best used for Qatar metal BOM-DOH-ORD, priced per-segment on the Avios
-      distance chart. Avoid routing over LHR - the UK APD on a business-class
-      departure is roughly GBP 200+ per person.
+      BOM-HKG-ORD on Cathay metal. Geographically this is the long way round --
+      eastbound across Asia and the Pacific to reach Chicago -- and Asia Miles
+      prices on distance flown, so it tends to be the most expensive option on
+      the roster for this particular city pair. Kept in scope because Asia Miles
+      occasionally releases business space when nobody else has any.
 
-  - key: flyingblue
-    name: Air France-KLM Flying Blue
-    alliance: SkyTeam
-    ratio: {standard: [1000, 500], platinum_charge: [1000, 1000]}
-    min_transfer_mr: 1000
-    increment_mr: 1000
-    verified: false
-    last_checked: null
-    award_search_url: "https://www.flyingblue.com/en/"
-    notes: >-
-      BOM-CDG/AMS-ORD. Fully dynamic pricing, so the number moves daily - this
-      is the single best partner to poll frequently. Monthly Promo Rewards cut
-      selected routes 25-50%; if BOM or ORD shows up in a Promo Reward month
-      that is the most realistic path to J on this balance.
-
-  - key: maharaja
-    name: Air India Maharaja Club
+  - key: krisflyer
+    name: Singapore Airlines KrisFlyer
     alliance: Star Alliance
-    ratio: {standard: [1000, 500], platinum_charge: [1000, 1000]}
+    currency: krisflyer
+    ratio: {standard: [1000, 500], platinum_charge: [1000, 500]}
     min_transfer_mr: 1000
     increment_mr: 1000
-    verified: false
-    last_checked: null
-    award_search_url: "https://www.airindia.com/in/en/maharajaclub.html"
+    verified: true
+    last_checked: "2026-08-24"
+    award_search_url: "https://www.singaporeair.com/redeemFlight"
     notes: >-
-      Absorbed Club Vistara in 2024, so an old Vistara transfer option in your
-      Amex account may now point here. AI has no BOM-ORD nonstop; DEL-ORD
-      nonstop exists, so BOM-DEL-ORD is the natural routing.
+      Singapore does not serve ORD, so every redemption here is a Star Alliance
+      partner award and prices off the partner chart rather than SQ's cheaper
+      saver rates. What makes it worth watching anyway is that Star has more
+      Chicago capacity than any other alliance -- United hubs there, and
+      Lufthansa, Swiss, Austrian and Air India all feed it -- so when partner
+      space exists at all, there is simply more of it to find. Booking Air India
+      metal BOM-DEL-ORD through KrisFlyer is the routing to check first.

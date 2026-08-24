@@ -7,6 +7,7 @@ Membership Rewards balance. Built for one specific question:
 - **Fixed point:** a wedding in Chicago on **8 May 2027**
 - **Cabins:** business and premium economy (economy deliberately excluded)
 - **Balance:** 115,000 Amex **India** Membership Rewards, Platinum Charge
+  (max **92,000 airline miles**, via Virgin Atlantic)
 
 ## The trip is defined by constraints, not by fixed dates
 
@@ -59,42 +60,61 @@ very different problems and you want to know which one you have.
 
 ## Read this before anything else
 
-The points sit on an Amex India **Platinum Charge**, which transfers most
-airline partners at **1 MR : 1 mile** rather than the 2:1 the other Indian Amex
-cards get. That is the difference between this trip being possible and not:
+The transfer ratios here were confirmed with the Amex card concierge on
+**24 August 2026** for a Platinum Charge card. The roster is six airlines, and
+**nothing transfers better than 10:8**:
 
-| | Miles | Covers a BOM-ORD round trip in... |
-|---|---:|---|
-| 115,000 MR at 1:1 (Platinum Charge — **your card**) | **115,000** | premium economy, yes. Business, no. |
-| 115,000 MR at 2:1 (MRCC, Gold Charge, Platinum Travel/Reserve) | 57,500 | neither |
+| Programme | Currency | Ratio | 115,000 MR becomes |
+|---|---|---|---:|
+| **Virgin Atlantic Flying Club** | virgin | **10:8** | **92,000** |
+| Qatar Airways Privilege Club | avios | 2:1 | 57,500 |
+| British Airways Executive Club | avios | 2:1 | 57,500 |
+| Etihad Guest | etihad | 2:1 | 57,500 |
+| Cathay Pacific Asia Miles | asiamiles | 2:1 | 57,500 |
+| Singapore Airlines KrisFlyer | krisflyer | 2:1 | 57,500 |
 
-Rough round-trip cost on this route, per person:
+Two things follow from that table, and both matter more than anything else in
+this repository.
 
-- **Premium economy:** ~88,000-110,000 miles — **within reach**
-- **Business:** ~175,000-210,000 miles — **short by roughly 60,000-95,000 miles**
+**Virgin is worth 60% more than everything else.** 0.80 miles per point against
+0.50 is not a marginal edge — it is the difference between 92,000 miles and
+57,500 from the same balance. Unless another programme prices a specific award
+dramatically lower, Virgin is where these points should go.
 
-So premium economy is a live booking today, and business is the thing worth
-watching for. Three things can close the business gap, and the poller tracks
-all of them:
+**Qatar and BA are not two options.** They share the Avios currency, so the
+57,500 figure is what the balance becomes in *either* — not in each. Transferring
+splits one pot; it does not create two. The report prints this warning every run
+because it is an easy and expensive mistake.
 
-1. **Flying Blue Promo Rewards.** Air France-KLM discounts selected routes
-   25-50% every month. A 50% promo on BOM-CDG-ORD is the single most plausible
-   route to business on this balance. Flying Blue is also fully dynamic, which
-   is why the workflow polls every 6 hours rather than daily.
-2. **Transfer bonuses.** Amex India runs periodic bonus-transfer promos. Put a
-   live one in `points.bonus_pct` (e.g. `{flyingblue: 30}`) and the report
-   re-prices everything against it. A 30% bonus turns 115,000 MR into 149,500
-   miles, which puts a discounted business round trip in range.
-3. **Business one way, premium the other.** 115,000 miles covers a one-way
-   business leg (~88,000) outright. The report prices each direction
-   separately, so this split is visible directly in the output.
+### What 92,000 miles actually reaches
 
-**Transfers are irreversible.** Never move points into a programme until you
-have the specific award seat held. Every ratio in
-`data/amex_in_partners.yaml` ships marked `verified: false` — confirm each one
-on americanexpress.com/in and flip the flag before you act on any of it. The
-Platinum Charge 1:1 ratios in particular are worth confirming per partner,
-since not every partner necessarily matches.
+Rough round-trip cost, BOM–ORD, per person:
+
+- **Premium economy:** ~88,000–110,000 miles — **borderline.** Virgin can reach
+  the bottom of that band. Nothing at 2:1 can.
+- **Business:** ~155,000–200,000 miles — **out of reach on every programme,**
+  short by roughly 60,000 miles at best.
+
+So premium economy on Virgin is the realistic target today, and business is what
+the poller exists to watch for. Three things could close the business gap:
+
+1. **An Amex transfer bonus.** A 30% bonus on Virgin turns 115,000 MR into
+   119,600 miles; a 60% bonus reaches 147,200. Put a live promo in
+   `points.bonus_pct` and the whole report re-prices against it. This is the
+   single most likely route to business, and it is worth asking the concierge to
+   flag the next Virgin promotion.
+2. **A cheap Virgin partner award.** Virgin redeems on Delta and Air France-KLM
+   as well as its own metal, and prices those separately from Virgin flights.
+3. **Business one way, premium the other.** 92,000 miles covers a one-way
+   business leg on the cheaper programmes. Each direction is priced separately in
+   the report, so this split shows up on its own.
+
+Note what is *not* on the list: Flying Blue Promo Rewards, Emirates and Air India
+are **not Amex India partners**, whatever general Membership Rewards guidance
+suggests. Do not plan around them.
+
+**Transfers are irreversible.** Never move points into a programme until the
+specific award seat is held.
 
 ## On seats.aero and doing this for free
 
@@ -160,8 +180,8 @@ Everything lives in `config.yaml`. The fields worth revisiting:
 
 | Field | Why you would change it |
 |---|---|
-| `points.card_tier` | Set to `platinum_charge`. Reverting to `standard` halves your usable miles. |
-| `points.bonus_pct` | Per-partner transfer bonus, e.g. `{etihad: 20}` |
+| `points.card_tier` | Set to `platinum_charge`, matching the confirmed ratios |
+| `points.bonus_pct` | Live transfer bonus, e.g. `{virgin: 30}` — the main lever on business |
 | `trip.*_window` | Search span. Widen it and the odds improve sharply. |
 | `trip.constraints` | The wedding anchor, the 15-day minimum, transit-day assumptions |
 | `alerts.max_miles_roundtrip` | Suppress everything above a mileage ceiling |
@@ -177,14 +197,20 @@ becomes a record of how the price moved.
 
 ## Caveats worth stating plainly
 
-- The baseline numbers in `data/award_baselines.yaml` are **planning estimates,
-  not prices.** Several of these programmes are fully dynamic; the same seat can
-  differ 2x between two dates.
+- The transfer ratios are confirmed; **the award costs in
+  `data/award_baselines.yaml` are not.** They are rough planning figures, and
+  they are the weakest numbers in this repository. Virgin, Qatar and Etihad all
+  price dynamically, so there is no chart to be right about.
 - Surcharges matter as much as miles here. Emirates in particular levies very
   heavy carrier-imposed fees on India-US business. The report shows taxes
   alongside miles for exactly this reason.
-- Singapore Airlines does not fly to ORD, and Air India's US nonstop is DEL-ORD,
-  not BOM-ORD. Every option on this route involves a connection.
+- No programme here flies BOM-ORD nonstop; every option connects. Qatar
+  (BOM-DOH-ORD) is the cleanest single-airline routing. Singapore does not serve
+  ORD at all, so KrisFlyer means a Star Alliance partner award — worth watching
+  anyway, since Star has more Chicago capacity than any other alliance.
+- Watch UK Air Passenger Duty on anything routing through Heathrow: a
+  business-class departure attracts roughly GBP 200 per person. A sub-24h transit
+  connection should be exempt, but confirm it on the actual itinerary.
 - Award space for India-US in early May is thin and goes early. Polling from now
   is the right call; 2027 schedules are already inside most programmes' booking
   windows.

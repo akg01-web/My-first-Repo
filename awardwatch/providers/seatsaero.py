@@ -22,14 +22,14 @@ API_ROOT = "https://seats.aero/partnerapi"
 
 # seats.aero calls its programmes "sources". Map ours onto theirs.
 SOURCE_TO_PARTNER = {
-    "singapore": "krisflyer",
-    "emirates": "emirates",
-    "etihad": "etihad",
-    "americanairlines": "ba_avios",
+    "virginatlantic": "virgin",
+    "virgin": "virgin",
+    "qatar": "qatar_avios",
     "british": "ba_avios",
-    "qatar": "ba_avios",
-    "flyingblue": "flyingblue",
-    "airindia": "maharaja",
+    "ba": "ba_avios",
+    "etihad": "etihad",
+    "cathay": "asiamiles",
+    "asiamiles": "asiamiles",
 }
 
 # seats.aero encodes cabin as a single letter in its field names.

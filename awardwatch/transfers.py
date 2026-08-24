@@ -17,6 +17,7 @@ class Partner:
     key: str
     name: str
     alliance: str
+    currency: str
     ratios: dict[str, tuple[int, int]]
     min_transfer_mr: int
     increment_mr: int
@@ -72,6 +73,7 @@ def load_partners(path: str | Path) -> list[Partner]:
                 key=str(row["key"]),
                 name=str(row["name"]),
                 alliance=str(row.get("alliance", "none")),
+                currency=str(row.get("currency", row["key"])),
                 ratios=ratios,
                 min_transfer_mr=int(row.get("min_transfer_mr", 1000)),
                 increment_mr=int(row.get("increment_mr", 1000)),

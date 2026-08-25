@@ -1,7 +1,7 @@
 <!-- awardwatch:report -->
 # Award watch: BOM to ORD, May 2027
 
-_Updated 2026-08-24 17:47 UTC_
+_Updated 2026-08-24 23:28 UTC_
 
 - Balance: **115,000 Amex India MR** (platinum_charge)
 - Outbound BOM-ORD: 2027-04-15..2027-05-05
@@ -18,8 +18,6 @@ _Updated 2026-08-24 17:47 UTC_
 ## Status
 
 Cheapest legal round trip is **88,000 miles** (etihad, premium): leave BOM 04 May, land 05 May, leave the US 21 May, 15 full days. 1 of 4 options are covered by the balance.
-
-**4 new option(s) since the last run.**
 
 ## (b) Round trips found
 
@@ -78,4 +76,5 @@ Free manual checks (no API key needed):
 ## Run notes
 
 - qatar_avios has no premium cabin on this route; not searched.
+- Baseline: 0/11 slots have enough history to judge against (need 24+ observations over 48+ hours).
 - 1 programme/cabin combination(s) had availability but no pairing that satisfies the trip constraints.

@@ -566,3 +566,27 @@ def test_no_fabricated_rows_in_the_committed_observation_log():
         return  # nothing collected yet
     bad = [o for o in observations.load(path) if o.source not in {"seatsaero"}]
     assert not bad, f"{len(bad)} row(s) from a non-live source: {sorted({o.source for o in bad})}"
+
+
+def test_scheduled_poll_is_pinned_to_the_default_branch():
+    """Five hourly runs executed on a merged feature branch against stale code.
+
+    A scheduled workflow can stay registered against a branch other than the
+    default one. Without this pin, deleting the branch is the only remedy, and
+    the branch keeps running old code on a timer until someone notices.
+    """
+    _, doc = _workflows()["award-watch.yml"]
+    poll = doc["jobs"]["poll"]
+    assert poll.get("if") == "github.ref == 'refs/heads/main'"
+
+
+def test_poll_commits_only_when_observations_changed():
+    """The report embeds a timestamp, so committing on report-diff alone
+    produces an empty commit every hour forever."""
+    text, _ = _workflows()["award-watch.yml"]
+    commit_step = text[text.index("Commit report and state"):]
+    gate = commit_step.index("git add -A data/observations.csv")
+    quiet = commit_step.index("git diff --staged --quiet")
+    report = commit_step.index("docs/award-watch.md", gate)
+    # The log is staged and tested for change *before* the report is staged.
+    assert gate < quiet < report

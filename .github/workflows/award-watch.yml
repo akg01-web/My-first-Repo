@@ -63,15 +63,8 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          # The report embeds a timestamp, so it differs every hour whether or
-          # not anything was observed. Commit only when the observation log
-          # actually grew -- otherwise main collects 24 empty commits a day.
-          git add -A data/observations.csv
-          if git diff --staged --quiet; then
-            echo "No new observations this run; nothing to commit."
-            git reset -q
-          else
-            git add -A docs/award-watch.md .awardwatch_state.json
-            git commit -m "award-watch: hourly observation $(date -u +%Y-%m-%dT%H:%MZ)"
-            git push
-          fi
+          bash scripts/commit_if_observed.sh \
+            data/observations.csv docs/award-watch.md .awardwatch_state.json
+
+      - name: Verify the commit step's own logic
+        run: bash tests/test_commit_step.sh

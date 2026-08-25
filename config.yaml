@@ -43,8 +43,9 @@ trip:
 providers:
   # seatsaero is skipped automatically unless SEATS_AERO_API_KEY is set.
   - seatsaero
-  # fixture reads tests/fixtures/*.json so the pipeline runs with no API key.
-  - fixture
+  # The fixture provider is for tests only and is deliberately NOT listed here.
+  # It produces invented data; enabling it in production would poison the
+  # observation log and every baseline computed from it.
 
 alerts:
   github_issue: true

@@ -377,3 +377,219 @@ def test_coverage_counts_only_established_slots():
     from awardwatch import baseline
     bases = baseline.build(_obs([90000] * 72) + _obs([50000] * 3, flight="2027-05-04"))
     assert baseline.coverage(bases, min_rows=24, min_hours=48) == (1, 2)
+
+
+def test_fixture_data_can_never_enter_the_observation_log():
+    """The bug that would have poisoned every baseline: sample data logged as real."""
+    from awardwatch import observations
+    cfg = _cfg()
+    opts = FixtureProvider().search(cfg.trip, "outbound", "business")
+    assert opts, "fixture returned nothing, so this test proves nothing"
+    assert observations.from_options(opts, live_sources={"seatsaero"}) == []
+    assert observations.from_options(opts, live_sources=set()) == []
+
+
+def test_only_live_sources_are_admitted_to_the_log():
+    from awardwatch import observations
+    cfg = _cfg()
+    opts = FixtureProvider().search(cfg.trip, "outbound", "business")
+    # Naming fixture as live is the only way its rows get in -- tests may, config may not.
+    assert len(observations.from_options(opts, live_sources={"fixture"})) == len(opts)
+
+
+def test_estimates_are_rejected_even_from_a_live_source():
+    from awardwatch import estimate, observations
+    cfg = _cfg()
+    baselines = estimate.load_baselines(cfg.baselines_path)
+    est = estimate.estimated_options(cfg.trip, baselines, ["virgin"])
+    assert est
+    for o in est:
+        object.__setattr__(o, "source", "seatsaero")  # even if a live source emitted it
+    assert observations.from_options(est, live_sources={"seatsaero"}) == []
+
+
+def test_production_config_does_not_enable_the_fixture_provider():
+    assert "fixture" not in _cfg().providers
+
+
+# --- transfer routing --------------------------------------------------------
+
+
+def _graph():
+    from awardwatch import routing
+    return routing.load_graph(config.REPO_ROOT / "data" / "transfer_graph.yaml")
+
+
+def test_virgin_direct_is_the_maximum_route():
+    from awardwatch import routing
+    cur, edges = _graph()
+    best = routing.best_routes(edges, cur, 115_000)[0]
+    assert best.target == "virgin"
+    assert best.miles == 92_000
+    assert best.hops == 1
+    assert best.verified
+
+
+def test_the_one_to_one_hotel_exit_is_a_trap():
+    """MR reaches Marriott at 1:1 -- double any airline edge -- and still loses.
+
+    This is the whole reason routing is computed rather than eyeballed: the
+    better first hop is more than undone by the 3:1 second hop.
+    """
+    from awardwatch import routing
+    cur, edges = _graph()
+    routes = {r.target: r for r in routing.best_routes(edges, cur, 115_000)}
+
+    via_marriott = routes["united"]
+    assert via_marriott.hops == 2
+    assert via_marriott.rate < 0.5          # worse than a plain 2:1 direct transfer
+    assert via_marriott.rate < routes["virgin"].rate
+
+    # And no two-hop route wins anywhere it competes with a direct edge.
+    for target in ("virgin", "avios_ba", "krisflyer", "etihad", "asiamiles"):
+        assert routes[target].hops == 1
+
+
+def test_marriott_block_bonus_is_granted_per_whole_block():
+    from awardwatch import routing
+    cur, edges = _graph()
+    edge = next(e for e in edges if e.source == "marriott" and e.target == "krisflyer")
+
+    # 60,000 -> 20,000 base + 5,000 bonus
+    assert edge.apply(60_000)[1] == 25_000
+    # 119,000 -> only one whole block earns the bonus
+    assert edge.apply(119_000)[1] == 39_666 + 5_000
+    # 59,000 -> no block, no bonus
+    assert edge.apply(59_000)[1] == 19_666
+
+
+def test_united_gets_the_larger_block_bonus():
+    from awardwatch import routing
+    _, edges = _graph()
+    united = next(e for e in edges if e.source == "marriott" and e.target == "united")
+    other = next(e for e in edges if e.source == "marriott" and e.target == "krisflyer")
+    assert united.apply(60_000)[1] - other.apply(60_000)[1] == 5_000
+
+
+def test_each_hop_strands_its_own_remainder():
+    from awardwatch import routing
+    cur, edges = _graph()
+    mr_to_marriott = next(e for e in edges if e.source == "amex_mr" and e.target == "marriott")
+    onward = next(e for e in edges if e.source == "marriott" and e.target == "krisflyer")
+
+    route = routing.evaluate((mr_to_marriott, onward), 115_600)
+    assert route.stranded["amex_mr"] == 600      # 1,000-point increment
+    assert route.total_stranded >= 600
+
+
+def test_below_minimum_yields_nothing_and_strands_everything():
+    from awardwatch import routing
+    _, edges = _graph()
+    edge = next(e for e in edges if e.source == "amex_mr" and e.target == "virgin")
+    spent, produced, stranded = edge.apply(500)
+    assert (spent, produced, stranded) == (0, 0, 500)
+
+
+def test_transfer_bonus_lifts_the_winning_route():
+    from awardwatch import routing
+    cur, edges = _graph()
+    plain = routing.best_routes(edges, cur, 115_000)[0]
+    boosted = routing.best_routes(edges, cur, 115_000, bonuses={"virgin": 30})[0]
+    assert boosted.miles == int(plain.miles * 1.3)
+    assert boosted.rate > 1.0    # a 30% bonus beats 1 mile per point
+
+
+def test_pooling_edges_never_appear_in_a_route():
+    """Pooling moves Avios between badges 1:1. It cannot create miles."""
+    from awardwatch import routing
+    cur, edges = _graph()
+    for route in routing.best_routes(edges, cur, 115_000):
+        assert not any(e.pooling for e in route.path)
+
+
+def test_pooling_group_is_transitive():
+    from awardwatch import routing
+    _, edges = _graph()
+    group = routing.pooling_group(edges, "avios_ba")
+    # Iberia and Aer Lingus are only reachable via BA; Qatar both ways.
+    assert group == {"avios_qatar", "avios_iberia", "avios_aerlingus"}
+
+
+def test_unverified_routes_are_flagged_as_such():
+    from awardwatch import routing
+    cur, edges = _graph()
+    routes = {r.target: r for r in routing.best_routes(edges, cur, 115_000)}
+    # Concierge confirmed the airline edges; the Marriott chain is inference.
+    assert routes["virgin"].verified
+    assert not routes["united"].verified
+
+
+# --- workflow validity -------------------------------------------------------
+
+
+def _workflows():
+    import yaml
+    root = config.REPO_ROOT / ".github" / "workflows"
+    return {p.name: (p.read_text(), yaml.safe_load(p.read_text())) for p in root.glob("*.yml")}
+
+
+def test_workflows_are_valid_yaml():
+    assert _workflows(), "no workflows found"
+
+
+def test_no_workflow_references_secrets_in_a_step_condition():
+    """GitHub rejects the entire file, and every run fails instantly with zero jobs.
+
+    This cost six silent failures before anyone looked, because a workflow that
+    never starts produces no job logs to read.
+    """
+    import re
+    offenders = []
+    for name, (text, _) in _workflows().items():
+        for lineno, line in enumerate(text.splitlines(), 1):
+            if re.search(r"^\s*if:.*secrets\.", line):
+                offenders.append(f"{name}:{lineno}")
+    assert not offenders, f"secrets context used in a step condition: {offenders}"
+
+
+def test_scheduled_workflow_does_not_enable_the_fixture_provider():
+    """The 19:35 run wrote fixture rows into the observation log as real data."""
+    import yaml
+    cfg = yaml.safe_load((config.REPO_ROOT / "config.yaml").read_text())
+    assert "fixture" not in (cfg.get("providers") or [])
+
+
+def test_no_fabricated_rows_in_the_committed_observation_log():
+    from awardwatch import observations
+    path = config.REPO_ROOT / "data" / "observations.csv"
+    if not path.exists():
+        return  # nothing collected yet
+    bad = [o for o in observations.load(path) if o.source not in {"seatsaero"}]
+    assert not bad, f"{len(bad)} row(s) from a non-live source: {sorted({o.source for o in bad})}"
+
+
+def test_scheduled_poll_is_pinned_to_the_default_branch_dynamically():
+    """GitHub runs schedules ONLY on the default branch, whatever it is called.
+
+    An earlier version of this guard hardcoded 'refs/heads/main'. This
+    repository's default branch is not main, so that condition could never be
+    true on a scheduled run -- it would have silently disabled the poll forever
+    while reading like a safety measure. Comparing against the default branch
+    from the event payload cannot drift.
+    """
+    _, doc = _workflows()["award-watch.yml"]
+    condition = doc["jobs"]["poll"].get("if", "")
+    assert "github.event.repository.default_branch" in condition
+    assert "refs/heads/" not in condition, "hardcoded branch name reintroduced"
+
+
+def test_poll_commits_only_when_observations_changed():
+    """The report embeds a timestamp, so committing on report-diff alone
+    produces an empty commit every hour forever."""
+    text, _ = _workflows()["award-watch.yml"]
+    commit_step = text[text.index("Commit report and state"):]
+    gate = commit_step.index("git add -A data/observations.csv")
+    quiet = commit_step.index("git diff --staged --quiet")
+    report = commit_step.index("docs/award-watch.md", gate)
+    # The log is staged and tested for change *before* the report is staged.
+    assert gate < quiet < report

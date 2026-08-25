@@ -65,8 +65,22 @@ class Observation:
         }
 
 
-def from_options(options: list[AwardOption], when: dt.datetime | None = None) -> list[Observation]:
+def from_options(
+    options: list[AwardOption],
+    live_sources: set[str],
+    when: dt.datetime | None = None,
+) -> list[Observation]:
+    """Convert options into loggable observations.
+
+    `live_sources` is required rather than optional on purpose. The log is the
+    evidence a deal is later justified by, so admission to it is deliberately
+    explicit: an option is logged only if it came from a named live provider and
+    is not a chart estimate. Sample data and test doubles can never get in by
+    default, because a baseline built on invented numbers would flag invented
+    deals with total confidence.
+    """
     when = when or dt.datetime.now(dt.timezone.utc)
+    options = [o for o in options if not o.estimated and o.source in live_sources]
     return [
         Observation(
             observed_at=when,

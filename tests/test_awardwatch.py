@@ -583,13 +583,21 @@ def test_scheduled_poll_is_pinned_to_the_default_branch_dynamically():
     assert "refs/heads/" not in condition, "hardcoded branch name reintroduced"
 
 
-def test_poll_commits_only_when_observations_changed():
-    """The report embeds a timestamp, so committing on report-diff alone
-    produces an empty commit every hour forever."""
+def test_commit_logic_lives_in_a_testable_script():
+    """Inline shell in YAML cannot be tested, and this block was wrong twice.
+
+    First it committed on every run, because the report embeds a timestamp and
+    so always differs. Then it failed the entire job, because `git add` on a
+    path that does not exist is fatal under `bash -e` -- and a missing
+    observation log is the normal state until a live provider runs.
+    """
     text, _ = _workflows()["award-watch.yml"]
     commit_step = text[text.index("Commit report and state"):]
-    gate = commit_step.index("git add -A data/observations.csv")
-    quiet = commit_step.index("git diff --staged --quiet")
-    report = commit_step.index("docs/award-watch.md", gate)
-    # The log is staged and tested for change *before* the report is staged.
-    assert gate < quiet < report
+    assert "scripts/commit_if_observed.sh" in commit_step
+    assert "git add" not in commit_step, "inline git plumbing reintroduced"
+    assert (config.REPO_ROOT / "scripts" / "commit_if_observed.sh").exists()
+
+
+def test_the_commit_script_is_exercised_by_ci():
+    text, _ = _workflows()["award-watch.yml"]
+    assert "tests/test_commit_step.sh" in text

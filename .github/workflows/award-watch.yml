@@ -23,13 +23,15 @@ concurrency:
 
 jobs:
   poll:
-    # A scheduled workflow can end up registered against a branch other than
-    # the default one, and then keeps running there against whatever stale code
-    # that branch holds. That is not hypothetical: five hourly runs executed on
-    # a merged feature branch and committed 55 rows of fixture data as if they
-    # were real observations. Pin the job to the default branch so a stale
-    # branch cannot resurrect old code on a timer.
-    if: github.ref == 'refs/heads/main'
+    # GitHub runs scheduled workflows ONLY on the repository's default branch.
+    # Hardcoding a branch name here is a trap: this repository's default branch
+    # is not "main", so an earlier version of this guard compared against a
+    # branch the scheduler never uses, and would have disabled the poll
+    # permanently while looking like a safety measure.
+    #
+    # Comparing against the default branch reported in the event payload is
+    # self-correcting -- it stays right if the default branch is ever renamed.
+    if: github.ref_name == github.event.repository.default_branch
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

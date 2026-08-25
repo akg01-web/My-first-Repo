@@ -568,16 +568,19 @@ def test_no_fabricated_rows_in_the_committed_observation_log():
     assert not bad, f"{len(bad)} row(s) from a non-live source: {sorted({o.source for o in bad})}"
 
 
-def test_scheduled_poll_is_pinned_to_the_default_branch():
-    """Five hourly runs executed on a merged feature branch against stale code.
+def test_scheduled_poll_is_pinned_to_the_default_branch_dynamically():
+    """GitHub runs schedules ONLY on the default branch, whatever it is called.
 
-    A scheduled workflow can stay registered against a branch other than the
-    default one. Without this pin, deleting the branch is the only remedy, and
-    the branch keeps running old code on a timer until someone notices.
+    An earlier version of this guard hardcoded 'refs/heads/main'. This
+    repository's default branch is not main, so that condition could never be
+    true on a scheduled run -- it would have silently disabled the poll forever
+    while reading like a safety measure. Comparing against the default branch
+    from the event payload cannot drift.
     """
     _, doc = _workflows()["award-watch.yml"]
-    poll = doc["jobs"]["poll"]
-    assert poll.get("if") == "github.ref == 'refs/heads/main'"
+    condition = doc["jobs"]["poll"].get("if", "")
+    assert "github.event.repository.default_branch" in condition
+    assert "refs/heads/" not in condition, "hardcoded branch name reintroduced"
 
 
 def test_poll_commits_only_when_observations_changed():

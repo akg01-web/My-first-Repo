@@ -1,0 +1,16 @@
+{
+  "name": "samsung-tv-remote",
+  "version": "1.0.0",
+  "private": true,
+  "description": "A phone-friendly web remote for Samsung smart TVs, with no dependencies.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node --test --test-timeout 20000 \"test/*.test.js\"",
+    "icons": "node scripts/make-icons.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "license": "MIT"
+}

@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192" role="img" aria-label="TV remote">
+  <rect width="192" height="192" fill="#12151b"/>
+  <g fill="none" stroke="#3b82f6" stroke-width="16" stroke-linecap="round">
+    <path d="M 68 45 A 54 54 0 1 0 124 45"/>
+    <path d="M96 30 V 82"/>
+  </g>
+</svg>

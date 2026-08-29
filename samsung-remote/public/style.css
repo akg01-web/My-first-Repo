@@ -1,0 +1,409 @@
+/* A remote you use in the dark, one-handed, without looking at it much:
+   big targets, high contrast, nothing that moves when you don't expect it. */
+
+:root {
+  --bg: #0b0d10;
+  --surface: #171a20;
+  --surface-hi: #222731;
+  --line: #2c313b;
+  --text: #eef1f6;
+  --muted: #99a1b0;
+  --accent: #3b82f6;
+  --accent-press: #2563eb;
+  --danger: #e5484d;
+  --ok: #37b26a;
+  --warn: #e8a33d;
+  --radius: 16px;
+}
+
+* { box-sizing: border-box; }
+
+/* A `display` rule beats the hidden attribute, and an invisible overlay that
+   still catches taps makes the whole remote dead. */
+[hidden] { display: none !important; }
+
+html, body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font: 500 16px/1.3 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  -webkit-text-size-adjust: 100%;
+  overscroll-behavior-y: contain;
+}
+
+body {
+  padding:
+    calc(env(safe-area-inset-top) + 8px)
+    calc(env(safe-area-inset-right) + 12px)
+    calc(env(safe-area-inset-bottom) + 16px)
+    calc(env(safe-area-inset-left) + 12px);
+  max-width: 520px;
+  margin-inline: auto;
+}
+
+button, input {
+  font: inherit;
+  color: inherit;
+  -webkit-tap-highlight-color: transparent;
+}
+
+button {
+  border: 0;
+  background: none;
+  cursor: pointer;
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* ---------- top bar ---------- */
+
+.bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.chip {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  padding: 10px 14px;
+  background: var(--surface);
+  border-radius: 999px;
+  color: var(--muted);
+  font-size: 14px;
+  text-align: left;
+}
+
+.chip #statusText {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dot {
+  flex: none;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--muted);
+  transition: background 160ms ease;
+}
+
+.dot.on { background: var(--ok); }
+.dot.busy { background: var(--warn); }
+.dot.off { background: var(--danger); }
+
+.icon-btn {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  background: var(--surface);
+  border-radius: 50%;
+}
+
+.icon-btn svg {
+  width: 22px;
+  height: 22px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+
+.icon-btn.power { color: var(--danger); }
+.icon-btn:active { background: var(--surface-hi); }
+
+/* ---------- generic buttons ---------- */
+
+.pill {
+  display: grid;
+  place-items: center;
+  min-height: 52px;
+  padding: 0 10px;
+  background: var(--surface);
+  border-radius: var(--radius);
+  font-size: 15px;
+  transition: background 90ms ease, transform 90ms ease;
+}
+
+.pill:active,
+.pill.pressed {
+  background: var(--surface-hi);
+  transform: scale(0.96);
+}
+
+.pill.primary { background: var(--accent); }
+.pill.primary:active { background: var(--accent-press); }
+.pill.quiet { background: transparent; border: 1px solid var(--line); color: var(--muted); }
+.pill.wide { width: 100%; margin-bottom: 8px; }
+
+.row {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.row.three { grid-template-columns: repeat(3, 1fr); }
+.row.four { grid-template-columns: repeat(4, 1fr); }
+.row.five { grid-template-columns: repeat(5, 1fr); }
+.row.media svg {
+  width: 20px;
+  height: 20px;
+  fill: currentColor;
+}
+
+.colours .pill { min-height: 42px; }
+.colours .red { background: #b3261e; }
+.colours .green { background: #1f7a41; }
+.colours .yellow { background: #b8860b; }
+.colours .blue { background: #1d4ed8; }
+
+/* ---------- d-pad and rockers ---------- */
+
+.pad-area {
+  display: grid;
+  grid-template-columns: 62px 1fr 62px;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 14px;
+}
+
+.dpad {
+  position: relative;
+  display: grid;
+  grid-template: repeat(3, 1fr) / repeat(3, 1fr);
+  aspect-ratio: 1;
+  background: var(--surface);
+  border-radius: 50%;
+  overflow: hidden;
+}
+
+.dp {
+  display: grid;
+  place-items: center;
+  transition: background 90ms ease;
+}
+
+.dp:active,
+.dp.pressed { background: var(--surface-hi); }
+
+.dp.up { grid-area: 1 / 2; }
+.dp.left { grid-area: 2 / 1; }
+.dp.ok { grid-area: 2 / 2; }
+.dp.right { grid-area: 2 / 3; }
+.dp.down { grid-area: 3 / 2; }
+
+/* Arrow heads drawn with a rotated chevron so they stay crisp at any size. */
+.dp i {
+  width: 13px;
+  height: 13px;
+  border-top: 2.5px solid var(--text);
+  border-right: 2.5px solid var(--text);
+  border-radius: 2px;
+}
+
+.dp.up i { transform: rotate(-45deg) translate(2px, 2px); }
+.dp.right i { transform: rotate(45deg) translate(1px, -1px); }
+.dp.down i { transform: rotate(135deg) translate(2px, 2px); }
+.dp.left i { transform: rotate(-135deg) translate(1px, -1px); }
+
+.dp.ok {
+  z-index: 1;
+  margin: -6px;
+  background: var(--accent);
+  border: 5px solid var(--bg);
+  border-radius: 50%;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.dp.ok:active,
+.dp.ok.pressed { background: var(--accent-press); }
+
+.rocker {
+  display: grid;
+  gap: 2px;
+  justify-items: center;
+  padding: 6px 0;
+  background: var(--surface);
+  border-radius: 999px;
+}
+
+.rock-btn {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 62px;
+  border-radius: 999px;
+  font-size: 26px;
+  font-weight: 600;
+  transition: background 90ms ease;
+}
+
+.rock-btn:active,
+.rock-btn.pressed { background: var(--surface-hi); }
+
+.rock-label {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+}
+
+/* ---------- drawers ---------- */
+
+.drawer {
+  margin-bottom: 10px;
+  background: var(--surface);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.drawer > summary {
+  padding: 14px 16px;
+  color: var(--muted);
+  font-size: 14px;
+  list-style: none;
+  cursor: pointer;
+}
+
+.drawer > summary::-webkit-details-marker { display: none; }
+
+.drawer > summary::after {
+  content: "＋";
+  float: right;
+  color: var(--muted);
+}
+
+.drawer[open] > summary::after { content: "－"; }
+.drawer[open] > summary { border-bottom: 1px solid var(--line); }
+.drawer > *:not(summary) { padding: 12px; }
+.drawer .row { margin-bottom: 0; }
+.drawer .pill { background: var(--surface-hi); }
+
+.numbers {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.apps {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+.typing {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px;
+}
+
+input[type="text"] {
+  min-height: 52px;
+  padding: 0 14px;
+  background: var(--surface-hi);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  min-width: 0;
+}
+
+input[type="text"]:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.hint {
+  margin: 10px 2px 0;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+/* ---------- setup sheet ---------- */
+
+.sheet {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  display: grid;
+  align-items: end;
+  background: rgba(0, 0, 0, 0.6);
+}
+
+.sheet-inner {
+  max-height: 88vh;
+  overflow-y: auto;
+  padding: 18px 16px calc(env(safe-area-inset-bottom) + 22px);
+  background: var(--bg);
+  border-top: 1px solid var(--line);
+  border-radius: 22px 22px 0 0;
+}
+
+.sheet-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.sheet-head h2 { margin: 0; font-size: 19px; }
+.sheet-note { margin: 0 0 14px; color: var(--muted); font-size: 14px; }
+
+.field {
+  display: grid;
+  gap: 6px;
+  margin-bottom: 12px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.field em { font-style: normal; opacity: 0.75; }
+
+.found { display: grid; gap: 8px; margin-bottom: 12px; }
+
+.found:empty { display: none; }
+
+.found button {
+  padding: 12px 14px;
+  background: var(--surface);
+  border-radius: var(--radius);
+  text-align: left;
+}
+
+.found button:active { background: var(--surface-hi); }
+.found small { display: block; color: var(--muted); font-size: 12px; }
+
+/* ---------- toast ---------- */
+
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: calc(env(safe-area-inset-bottom) + 18px);
+  z-index: 20;
+  max-width: min(92vw, 460px);
+  padding: 12px 16px;
+  background: var(--surface-hi);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  color: var(--text);
+  font-size: 14px;
+  text-align: center;
+  transform: translateX(-50%);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+}
+
+.toast.bad { border-color: var(--danger); }
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; }
+  .pill:active, .pill.pressed { transform: none; }
+}
